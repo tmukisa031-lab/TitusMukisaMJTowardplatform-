@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Storefront - TitusMukisaMJToward</title>
+  <link rel="stylesheet" href="../styles/global.css">
+  <style>
+    body { font-family: sans-serif; background: #f9f9f9; margin: 0; }
+    main { max-width: 900px; margin: 2em auto; padding: 1em; background: white; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+    .product, .cart-item, .offer, .card { margin-bottom: 1em; padding: 1em; border-radius: 10px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    button { padding: 0.4em 0.8em; border-radius: 5px; border: none; cursor: pointer; margin-right: 0.3em; }
+    .btn-add { background: #0077cc; color: white; }
+    .btn-remove { color: red; background: none; text-decoration: underline; cursor: pointer; }
+    .cart { border: 1px solid #ccc; padding: 1em; border-radius: 10px; background: #f0f0f0; margin-top: 2em; }
+    .offers { border: 1px solid #ffeb3b; background: #fff8c5; padding: 1em; border-radius: 10px; margin-top: 2em; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 1em; }
+    @media(min-width:768px){ .grid { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="bg-blue-900 text-white p-6 text-center">
+    <h1>TitusMukisaMJToward Storefront</h1>
+  </header>
+  <!-- Navigation -->
+  <nav class="bg-gray-800 text-white p-4 text-center">
+    <a href="../index.html" class="text-white px-2">Home</a>
+    <a href="store.html" class="text-white px-2">Store</a>
+    <a href="../media/media.html" class="text-white px-2">Media</a>
+    <a href="../about/about.html" class="text-white px-2">About</a>
+    <a href="../controlpad/controlpad.html" class="text-white px-2">Control Panel</a>
+  </nav>
+
+  <main>
+    <h2>Buy Our Products</h2>
+    <!-- Auto/Manual Pricing & Currency -->
+    <div style="margin-bottom:1em;">
+      <label><input type="checkbox" id="autoPricing" checked> Enable Auto Pricing</label>
+      <label style="margin-left:1em;">
+        Currency: 
+        <select id="currencySelect">
+          <option value="USD" selected>USD</option>
+          <option value="UGX">UGX</option>
+          <option value="EUR">EUR</option>
+          <option value="GBP">GBP</option>
+        </select>
+      </label>
+    </div>
+
+    <!-- Product List -->
+    <div id="productList" class="grid"></div>
+
+    <!-- Shopping Cart -->
+    <div class="cart">
+      <h3>🛒 Shopping Cart</h3>
+      <div id="cartItems">Your cart is empty.</div>
+      <div id="cartControls" style="display:none; margin-top:1em;">
+        <label>Select Payment Method:
+          <select id="paymentMethod">
+            <option>Credit Card</option>
+            <option>Mobile Money</option>
+            <option>PayPal</option>
+            <option>Crypto</option>
+          </select>
+        </label>
+        <div style="margin-top:1em;">
+          <strong>Total:</strong> <span id="cartTotal">0</span>
+        </div>
+        <button onclick="checkout()" style="background:green; color:white; margin-top:0.5em;">💳 Checkout</button>
+      </div>
+    </div>
+
+    <!-- Offers & Promotions -->
+    <div class="offers">
+      <h3>Current Offers & Promotions</h3>
+      <ul id="offersList">
+        <li>Buy 2 ebooks, get 1 free</li>
+        <li>Subscribe to AI Tools and get 10% discount on all items</li>
+        <li>Free sample ebook available for all new visitors</li>
+      </ul>
+    </div>
+
+    <!-- Features Section -->
+    <section class="features">
+      <h3>Store Features</h3>
+      <ul>
+        <li>✔ One-time purchases</li>
+        <li>✔ Subscriptions and recurring payments</li>
+        <li>✔ Free samples and promotional content</li>
+        <li>✔ Discounts, coupons, and limited offers</li>
+        <li>✔ AI-assisted Auto Pricing (optional)</li>
+        <li>✔ Multi-currency, global payment methods</li>
+        <li>✔ Vendor/Partner selling (earn commission)</li>
+      </ul>
+    </section>
+
+    <!-- Recommendation Section -->
+    <section class="recommendations">
+      <h3>Recommended for You</h3>
+      <p>Our AI suggests items based on current affairs, research, and profit optimization.</p>
+      <ul>
+        <li>⭐ New Release: "Lord of the Tames"</li>
+        <li>⭐ Free Media Samples now available</li>
+        <li>⭐ Discounted Bundles on Courses + Books</li>
+      </ul>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-gray-200 text-center p-6 mt-8">
+    <p>&copy; 2025 TitusMukisaMJToward | Email: <a href="mailto:tmukisa031@gmail.com">tmukisa031@gmail.com</a> | Phone: <a href="tel:+256702802338">+256702802338</a></p>
+  </footer>
+
+  <script>
+    const products = [
+      { id:1, name:"The Listener [A Story About The Man]", price:35000, currency:"UGX", free:false, downloadLink:"#", tags:["Story"], category:"Books" },
+      { id:2, name:"The Starlife", price:15, currency:"USD", free:false, downloadLink:"#", tags:["Astronomy"], category:"Books" },
+      { id:3, name:"The Tales Man Art", price:30000, currency:"UGX", free:false, downloadLink:"#", tags:["Art"], category:"Books" },
+      { id:4, name:"Free Sample Ebook", price:0, currency:"UGX", free:true, downloadLink:"#", tags:["Sample"], category:"Books" }
+    ];
+
+    const exchangeRates = { USD:1, UGX:3700, EUR:0.91, GBP:0.79 };
+    let cart = [];
+
+    function convertPrice(price, fromCurrency, toCurrency){
+      const usd = price / (exchangeRates[fromCurrency] || 1);
+      return usd * (exchangeRates[toCurrency] || 1);
+    }
+
+    function displayProducts() {
+      const productList = document.getElementById("productList");
+      const autoPricing = document.getElementById("autoPricing").checked;
+      const selectedCurrency = document.getElementById("currencySelect").value;
+      productList.innerHTML = "";
+      products.forEach(p=>{
+        let displayPrice = p.free ? "Free" : (autoPricing ? p.price*1.05 : p.price);
+        displayPrice = p.free ? "Free" : convertPrice(displayPrice,p.currency,selectedCurrency).toFixed(2);
+        const div = document.createElement("div");
+        div.className = "product card";
+        div.innerHTML = `<strong>${p.name}</strong> - ${p.free?"Free":selectedCurrency+" "+displayPrice}
+          <br><a href="${p.downloadLink}" style="color:blue;text-decoration:underline;">Download</a>
+          ${!p.free?`<button class="btn-add" onclick="addToCart(${p.id})">🛒 Add to Cart</button>`:
+          '<span style="color:green;margin-left:0.5em;">🎁 Free Item</span>'}
+          ${p.tags ? `<div style="font-size:0.9em;color:gray;">Category: ${p.category} | Tags: ${p.tags.join(", ")}</div>` : ""}
+        `;
+        productList.appendChild(div);
+      });
+    }
+
+    function addToCart(productId){
+      const prod = products.find(p=>p.id===productId);
+      cart.push(prod);
+      displayCart();
+    }
+
+    function removeFromCart(index){
+      cart.splice(index,1);
+      displayCart();
+    }
+
+    function displayCart(){
+      const cartDiv = document.getElementById("cartItems");
+      const controls = document.getElementById("cartControls");
+      if(cart.length===0){
+        cartDiv.innerHTML="Your cart is empty.";
+        controls.style.display="none";
+        return;
+      }
+      controls.style.display="block";
+      const selectedCurrency = document.getElementById("currencySelect").value;
+      cartDiv.innerHTML = cart.map((item,i)=>`
+        <div class="cart-item">
+          ${item.name} ${item.free?"(Free)":selectedCurrency+" "+convertPrice(item.price,item.currency,selectedCurrency).toFixed(2)}
+          <button class="btn-remove" onclick="removeFromCart(${i})">Remove</button>
+        </div>
+      `).join("");
+      const total = cart.reduce((sum,item)=>{
+        return sum+(item.free?0:convertPrice(item.price,item.currency,selectedCurrency));
+      },0);
+      document.getElementById("cartTotal").textContent = total.toFixed(2);
+    }
+
+    function checkout(){
+      if(cart.length===0){ alert("Your cart is empty!"); return; }
+      const method = document.getElementById("paymentMethod").value;
+      const total = document.getElementById("cartTotal").textContent;
+      alert(`Proceeding to payment via ${method}. Total: ${document.getElementById("currencySelect").value} ${total}`);
+      cart = [];
+      displayCart();
+    }
+
+    document.getElementById("autoPricing").addEventListener("change", displayProducts);
+    document.getElementById("currencySelect").addEventListener("change", ()=>{
+      displayProducts();
+      displayCart();
+    });
+
+    displayProducts();
+  </script>
+</body>
+</html>

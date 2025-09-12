@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control Pad - TitusMukisaMJToward</title>
+  <link rel="stylesheet" href="../styles/global.css">
+  <style>
+    .card {
+      background: white;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      text-align: center;
+      text-decoration: none;
+      display: block;
+      color: inherit;
+      transition: background 0.3s;
+    }
+    .card:hover {
+      background: #e0f2fe;
+    }
+    main {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    @media(min-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="bg-blue-900 text-white p-6 text-center">
+    <h1>TitusMukisaMJToward Platform - Control Pad</h1>
+  </header>
+  <nav class="bg-gray-800 text-white p-4 text-center">
+    <a href="../index.html" class="text-white px-2">Home</a>
+    <a href="../storefront/storefront.html" class="text-white px-2">Storefront</a>
+    <a href="../media/media.html" class="text-white px-2">Media Center</a>
+    <a href="../science/science.html" class="text-white px-2">Science</a>
+    <a href="../ai-tools/ai-tools.html" class="text-white px-2">AI Tools</a>
+    <a href="../about/about.html" class="text-white px-2">About</a>
+  </nav>
+  <main>
+    <h2>Control Panel</h2>
+    <p>Manage platform settings, access AI tools, and review statistics.</p>
+    <div class="grid">
+      <a href="../admin/admin.html" class="card">
+        <h3>Admin Dashboard</h3>
+        <p>Manage users, content, and approvals.</p>
+      </a>
+      <a href="../ai-tools/ai-tools.html" class="card">
+        <h3>AI Tools</h3>
+        <p>Access AI-powered utilities and experiments.</p>
+      </a>
+      <a href="../science/science.html" class="card">
+        <h3>Science Hub</h3>
+        <p>Use calculators and scientific resources.</p>
+      </a>
+      <a href="../storefront/storefront.html" class="card">
+        <h3>Storefront</h3>
+        <p>View and manage products in the platform store.</p>
+      </a>
+      <a href="../media/media.html" class="card">
+        <h3>Media Center</h3>
+        <p>Watch or listen to available media files.</p>
+      </a>
+      <a href="../learning/learning.html" class="card">
+        <h3>Learning Hub</h3>
+        <p>Access courses, lessons, and tutorials.</p>
+      </a>
+    </div>
+  </main>
+  <footer class="bg-gray-900 text-gray-200 text-center p-6 mt-8">
+    <p>&copy; 2025 TitusMukisaMJToward | Email: <a href="mailto:tmukisa031@gmail.com">tmukisa031@gmail.com</a> | Phone: <a href="tel:+256702802338">+256702802338</a></p>
+  </footer>
+</body>
+</html>

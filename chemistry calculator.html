@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chemistry Calculator - TitusMukisaMJToward</title>
+  <link rel="stylesheet" href="../styles/global.css">
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f4f8; }
+    main { max-width: 900px; margin: 2em auto; padding: 1em; background: white; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+    input, select { padding: 0.5em; width: 100%; margin-bottom: 1em; border-radius: 5px; border: 1px solid #ccc; }
+    button { padding: 0.5em 1em; border-radius: 5px; background-color: #001f3f; color: white; border: none; cursor: pointer; }
+    button:hover { background-color: #003366; }
+    pre { background: #eee; padding: 1em; margin-top: 1em; border-radius: 5px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <header class="bg-blue-900 text-white p-6 text-center">
+    <h1>TitusMukisaMJToward Platform</h1>
+  </header>
+  <nav class="bg-gray-800 text-white p-4 text-center">
+    <a href="../index.html" class="text-white px-2">Home</a>
+    <a href="chemistry-calculator.html" class="text-white px-2">Chemistry Calculator</a>
+    <a href="../media/media.html" class="text-white px-2">Media</a>
+    <a href="../science/science.html" class="text-white px-2">Science</a>
+    <a href="../about/about.html" class="text-white px-2">About</a>
+  </nav>
+  <main>
+    <h2>Chemistry Calculator</h2>
+    <p>Enter reactants/products separated by commas (e.g., H2,O2,H2O)</p>
+
+    <select id="mode" style="padding:0.5em; width:100%; margin-bottom:1em; border-radius:5px; border:1px solid #ccc;">
+      <option value="molar">Molar Mass</option>
+      <option value="balanced">Balanced Equation</option>
+      <option value="stoichiometry">Stoichiometry</option>
+      <option value="reverse">Reverse Reaction</option>
+      <option value="substitute">Substitute Finder</option>
+      <option value="mechanism">Reaction Mechanism</option>
+    </select>
+
+    <input type="text" id="reactants" placeholder="Enter chemicals..." />
+
+    <button onclick="calculate()">Calculate</button>
+
+    <pre id="result"></pre>
+  </main>
+  <footer class="bg-gray-900 text-gray-200 text-center p-6 mt-8">
+    <p>&copy; 2025 TitusMukisaMJToward | Email: <a href="mailto:tmukisa031@gmail.com">tmukisa031@gmail.com</a> | Phone: <a href="tel:+256702802338">+256702802338</a></p>
+  </footer>
+
+  <script>
+    function calculate() {
+      const input = document.getElementById('reactants').value.trim();
+      const mode = document.getElementById('mode').value;
+      const resultEl = document.getElementById('result');
+      if (!input) {
+        resultEl.textContent = "Please enter reactants or products.";
+        return;
+      }
+
+      const items = input.split(',').map(c => c.trim().toUpperCase());
+      let output = "";
+
+      // Original hardcoded logic
+      items.forEach(c => {
+        if (c === "H2O") output += "H2O → Molar Mass: 18.015 g/mol\n";
+        else if (c === "NACL") output += "NaCl → Molar Mass: 58.44 g/mol\n";
+        else output += `Calculation for "${c}" is not yet supported.\n`;
+      });
+
+      // New modes
+      switch(mode) {
+        case "stoichiometry":
+          output += "\n[Stoichiometry]: Quantitative calculation of reactants/products.\n";
+          break;
+        case "balanced":
+          output += "\n[Balanced Equation]: Display equation for reaction.\n";
+          break;
+        case "reverse":
+          output += "\n[Reverse Reaction]: Find possible reactants from products.\n";
+          break;
+        case "substitute":
+          output += "\n[Substitute Finder]: Suggest alternative chemicals for the reaction.\n";
+          break;
+        case "mechanism":
+          output += "\n[Mechanism]: Outline reaction steps and electron flow.\n";
+          break;
+        // default "molar" already handled by original logic
+      }
+
+      resultEl.textContent = output;
+    }
+  </script>
+</body>
+</html>

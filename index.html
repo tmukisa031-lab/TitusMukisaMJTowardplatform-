@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TitusMukisaMJToward Platform</title>
+  <meta name="description" content="Unified AI-powered platform for books, media, science, and more.">
+  <link rel="stylesheet" href="../styles/global.css">
+</head>
+<body>
+  <header class="bg-blue-900 text-white p-6 text-center">
+    <h1 class="text-3xl font-bold">TitusMukisaMJToward Platform</h1>
+  </header>
+
+  <nav class="bg-gray-800 text-white p-4 text-center">
+    <a href="/">Home</a> |
+    <a href="/storefront.html">Library</a> |
+    <a href="/media.html">Media</a> |
+    <a href="/science.html">Science</a> |
+    <a href="/about.html">About</a>
+  </nav>
+
+  <section class="hero text-center p-8 bg-gradient-to-b from-gray-100 to-blue-100">
+    <h1>Welcome to TitusMukisaMJToward</h1>
+    <p>Your hub for books, science, media, and AI-powered tools.</p>
+    <a href="/about.html" class="btn bg-blue-600 text-white px-4 py-2 rounded">Explore About</a>
+  </section>
+
+  <div class="container mx-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="card p-4 shadow rounded bg-white">
+      <h3>📚 Books & Stories</h3>
+      <p>Explore ebooks like The Starlife and The Listener.</p>
+      <a href="/storefront.html" class="btn text-blue-600 mt-2 inline-block">Visit Library</a>
+    </div>
+
+    <div class="card p-4 shadow rounded bg-white">
+      <h3>🎬 Media Hub</h3>
+      <p>Access movies, series, and audio collections.</p>
+      <a href="/media.html" class="btn text-blue-600 mt-2 inline-block">Go to Media</a>
+    </div>
+
+    <div class="card p-4 shadow rounded bg-white">
+      <h3>🔬 Science</h3>
+      <p>Use calculators, experiments, and AI-powered science tools.</p>
+      <a href="/science.html" class="btn text-blue-600 mt-2 inline-block">Science Tools</a>
+    </div>
+  </div>
+
+  <div class="media-player text-center bg-gray-800 p-6 mt-6">
+    <h2 class="text-white text-2xl mb-4">🎧 Featured Media</h2>
+    <video controls class="mx-auto w-full max-w-md rounded">
+      <source src="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    <div class="control-bar mt-4 space-x-4">
+      <button onclick="document.querySelector('video').play()">▶ Play</button>
+      <button onclick="document.querySelector('video').pause()">⏸ Pause</button>
+      <button onclick="document.querySelector('video').currentTime=0; document.querySelector('video').pause()">⏹ Stop</button>
+    </div>
+  </div>
+
+  <footer class="bg-gray-900 text-gray-200 text-center p-6 mt-8">
+    <p>&copy; 2025 TitusMukisaMJToward. All rights reserved.</p>
+  </footer>
+</body>
+</html>

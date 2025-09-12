@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "scripts/05_api-server.js", "use": "@vercel/node" },
+    { "src": "pages/**/*.js", "use": "@vercel/next" },
+    { "src": "styles/**/*.css", "use": "@vercel/static" },
+    { "src": "public/**", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "scripts/05_api-server.js" },
+    { "src": "/(.*)", "dest": "/pages/$1" }
+  ]
+}

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Media Center - TitusMukisaMJToward</title>
+  <link rel="stylesheet" href="../styles/global.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #1e40af;
+      color: white;
+      padding: 1.5em;
+      text-align: center;
+    }
+    nav {
+      background: #1f2937;
+      text-align: center;
+      padding: 0.8em 0;
+    }
+    nav a {
+      color: white;
+      margin: 0 0.8em;
+      text-decoration: none;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    main {
+      max-width: 900px;
+      margin: 2em auto;
+      padding: 1em;
+    }
+    .media-card {
+      background: white;
+      padding: 1em;
+      margin-bottom: 1em;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    video, audio {
+      width: 100%;
+      border-radius: 5px;
+      margin-top: 0.5em;
+    }
+    .btn {
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.25rem;
+      text-decoration: none;
+      background-color: #2563eb;
+      color: white;
+      margin-top: 0.5em;
+      display: inline-block;
+    }
+    .btn:hover {
+      background-color: #1d4ed8;
+    }
+    .free-badge {
+      color: green;
+      font-weight: bold;
+      margin-left: 0.5em;
+    }
+    .cart-section {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: #f3f4f6;
+      border-radius: 0.5rem;
+    }
+    .offers {
+      margin-top: 2rem;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      background: #fef3c7;
+    }
+    footer {
+      background: #111827;
+      color: #e5e7eb;
+      text-align: center;
+      padding: 1.5em;
+      margin-top: 2em;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>TitusMukisaMJToward Platform</h1>
+  </header>
+
+  <nav>
+    <a href="../index.html">Home</a>
+    <a href="../chemistry/chemistry-calculator.html">Chemistry Calculator</a>
+    <a href="media.html">Media Center</a>
+    <a href="../science/science.html">Science</a>
+    <a href="../about/about.html">About</a>
+  </nav>
+
+  <main>
+    <h2>Media Center</h2>
+    <p>Watch videos, listen to audio, and access digital media content. Explore our
+      <a href="/storefront" class="text-blue-600">Storefront</a> or go back to the
+      <a href="/" class="text-blue-600">Homepage</a>.
+    </p>
+
+    <!-- Media Items -->
+    <div class="media-card">
+      <h3>Big Buck Bunny</h3>
+      <p>Sample video from Blender.</p>
+      <video controls>
+        <source src="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+      <a href="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4" class="btn">Access / Download</a>
+    </div>
+
+    <div class="media-card">
+      <h3>Relaxing Music</h3>
+      <p>Sample audio track.</p>
+      <audio controls>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+      </audio>
+      <a href="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" class="btn">Access</a>
+      <span class="free-badge">🎁 Free Item</span>
+    </div>
+
+    <!-- Shopping Cart -->
+    <div id="cart" class="cart-section" style="display:none;">
+      <h3>🛒 Shopping Cart</h3>
+      <ul id="cart-items"></ul>
+      <label for="payment-method">Select Payment Method:</label>
+      <select id="payment-method">
+        <option value="Credit Card">Credit Card</option>
+        <option value="Mobile Money">Mobile Money</option>
+        <option value="PayPal">PayPal</option>
+        <option value="Crypto">Crypto</option>
+      </select>
+      <p id="total">Total: 0</p>
+      <button onclick="checkout()" class="btn">💳 Checkout</button>
+    </div>
+
+    <!-- Offers Section -->
+    <section class="offers">
+      <h3>Current Offers & Promotions</h3>
+      <ul>
+        <li>Buy 2 media items, get 1 free</li>
+        <li>Subscribe to AI Tools and get 10% discount on all items</li>
+        <li>Free audio sample available for all new visitors</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 TitusMukisaMJToward | Email: <a href="mailto:tmukisa031@gmail.com">tmukisa031@gmail.com</a> | Phone: <a href="tel:+256702802338">+256702802338</a></p>
+  </footer>
+
+  <script>
+    const cartItems = [];
+    const cartDiv = document.getElementById('cart');
+    const ul = document.getElementById('cart-items');
+    const totalElem = document.getElementById('total');
+    const paymentSelect = document.getElementById('payment-method');
+
+    function addToCart(name, price) {
+      cartItems.push({ name, price });
+      renderCart();
+    }
+
+    function renderCart() {
+      ul.innerHTML = '';
+      let total = 0;
+      cartItems.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item.name + ' - ' + (item.price ? item.price : 'Free');
+        ul.appendChild(li);
+        total += item.price || 0;
+      });
+      totalElem.textContent = 'Total: ' + total;
+      cartDiv.style.display = cartItems.length ? 'block' : 'none';
+    }
+
+    function checkout() {
+      if(cartItems.length === 0){
+        alert("Your cart is empty!");
+        return;
+      }
+      const method = paymentSelect.value;
+      let total = 0;
+      cartItems.forEach(item => { total += item.price || 0; });
+      alert(`Proceeding to payment via ${method}. Total: ${total}`);
+      cartItems.length = 0;
+      renderCart();
+    }
+  </script>
+</body>
+</html>
