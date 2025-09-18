@@ -1,0 +1,70 @@
+{
+  "tv": [
+    {
+      "id": 1,
+      "title": "Free News Channel",
+      "url": "http://example.com/streams/free-news.m3u8",
+      "free": true
+    },
+    {
+      "id": 2,
+      "title": "Global Sports (Premium)",
+      "url": "http://example.com/streams/premium-sports.m3u8",
+      "free": false
+    },
+    {
+      "id": 3,
+      "title": "Documentary Channel (Premium)",
+      "url": "http://example.com/streams/premium-docs.m3u8",
+      "free": false
+    }
+  ],
+  "radio": [
+    {
+      "id": 1,
+      "title": "Local FM",
+      "url": "http://example.com/streams/localfm.mp3",
+      "free": true
+    },
+    {
+      "id": 2,
+      "title": "Jazz Radio (Premium)",
+      "url": "http://example.com/streams/jazzradio.mp3",
+      "free": false
+    }
+  ],
+  "audio": [
+    {
+      "id": 1,
+      "title": "Free Song – Relax Beats",
+      "url": "http://example.com/audio/relaxbeats.mp3",
+      "free": true
+    },
+    {
+      "id": 2,
+      "title": "Premium Album – StarLife Collection",
+      "url": "http://example.com/audio/starlife.mp3",
+      "free": false
+    }
+  ],
+  "video": [
+    {
+      "id": 1,
+      "title": "Free Short Film – Nature Walk",
+      "url": "http://example.com/video/naturewalk.mp4",
+      "free": true
+    },
+    {
+      "id": 2,
+      "title": "Premium Movie – The Listener",
+      "url": "http://example.com/video/thelistener.mp4",
+      "free": false
+    },
+    {
+      "id": 3,
+      "title": "Premium Movie – Lord of the Tames",
+      "url": "http://example.com/video/lordofthetames.mp4",
+      "free": false
+    }
+  ]
+}

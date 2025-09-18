@@ -1,49 +1,20 @@
 {
-  "name": "titusmukisamjtoward-platform",
+  "name": "universal-media-hub-frontend",
   "version": "1.0.0",
   "private": true,
-  "description": "Unified TitusMukisaMJToward platform combining Next.js frontend, Express backend, chemistry calculator, AI tools, media, learning, storefront, and admin dashboard.",
-  "main": "scripts/05_api-server.js",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "serve:api": "node scripts/05_api-server.js",
-    "lint": "next lint"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
     "axios": "^1.5.0",
-    "body-parser": "^1.20.2",
-    "chart.js": "^4.4.0",
-    "cors": "^2.8.5",
-    "express": "^4.18.2",
-    "lodash": "^4.17.21",
-    "next": "14.2.3",
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "react-router-dom": "^6.15.0"
   },
   "devDependencies": {
-    "eslint": "^8.50.0",
-    "prettier": "^3.1.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/yourusername/titusmukisamjtoward-platform.git"
-  },
-  "keywords": [
-    "nextjs",
-    "react",
-    "express",
-    "AI",
-    "chemistry",
-    "calculator",
-    "learning",
-    "platform",
-    "storefront",
-    "education",
-    "admin-dashboard"
-  ],
-  "author": "Mukisa Titus Mwanje",
-  "license": "MIT",
-  "homepage": "https://titusmukisa.com.free"
+    "@vitejs/plugin-react": "^4.0.0",
+    "vite": "^4.5.0"
+  }
 }
