@@ -1,65 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>TitusMukisaMJToward Platform</title>
-  <meta name="description" content="Unified AI-powered platform for books, media, science, and more.">
-  <link rel="stylesheet" href="../styles/global.css">
+<meta charset="UTF-8">
+<title>Universal Media Hub</title>
+<style>
+body { font-family: Arial, sans-serif; background:#111; color:#eee; text-align:center; margin:0; padding:0; }
+h1,h2 { color:#0ff; margin:10px 0; }
+.section { margin:20px auto; padding:15px; background:#222; border-radius:12px; width:90%; max-width:1000px; box-shadow:0 0 15px rgba(0,0,0,0.5); position:relative; }
+input, select { width:95%; margin:8px 0; padding:8px; border-radius:8px; border:none; }
+video, audio { width:100%; margin-top:10px; border-radius:8px; background:#000; max-height:400px; }
+.remote { display:flex; flex-wrap:wrap; justify-content:center; margin-top:10px; }
+.remote button { margin:3px; padding:8px 12px; border:none; border-radius:8px; background:#333; color:#0ff; cursor:pointer; font-size:14px; }
+.remote button:hover { background:#0ff; color:#000; }
+#guideOverlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; flex-direction:column; justify-content:center; align-items:center; color:#0ff; font-size:20px; font-weight:bold; text-shadow:2px 2px 4px #000; }
+#guideOverlay img { max-width:90%; max-height:70%; margin-bottom:10px; border-radius:12px; box-shadow:0 0 20px rgba(0,0,0,0.8); }
+.tv-frame { width:100%; max-width:900px; height:500px; background:#111; border:15px solid #333; border-radius:15px; box-shadow:0 0 40px rgba(0,0,0,0.8); overflow:hidden; position:relative; margin:0 auto; }
+</style>
 </head>
 <body>
-  <header class="bg-blue-900 text-white p-6 text-center">
-    <h1 class="text-3xl font-bold">TitusMukisaMJToward Platform</h1>
-  </header>
+<h1>🌍 Universal Media Hub</h1>
 
-  <nav class="bg-gray-800 text-white p-4 text-center">
-    <a href="/">Home</a> |
-    <a href="/storefront.html">Library</a> |
-    <a href="/media.html">Media</a> |
-    <a href="/science.html">Science</a> |
-    <a href="/about.html">About</a>
-  </nav>
-
-  <section class="hero text-center p-8 bg-gradient-to-b from-gray-100 to-blue-100">
-    <h1>Welcome to TitusMukisaMJToward</h1>
-    <p>Your hub for books, science, media, and AI-powered tools.</p>
-    <a href="/about.html" class="btn bg-blue-600 text-white px-4 py-2 rounded">Explore About</a>
-  </section>
-
-  <div class="container mx-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-    <div class="card p-4 shadow rounded bg-white">
-      <h3>📚 Books & Stories</h3>
-      <p>Explore ebooks like The Starlife and The Listener.</p>
-      <a href="/storefront.html" class="btn text-blue-600 mt-2 inline-block">Visit Library</a>
-    </div>
-
-    <div class="card p-4 shadow rounded bg-white">
-      <h3>🎬 Media Hub</h3>
-      <p>Access movies, series, and audio collections.</p>
-      <a href="/media.html" class="btn text-blue-600 mt-2 inline-block">Go to Media</a>
-    </div>
-
-    <div class="card p-4 shadow rounded bg-white">
-      <h3>🔬 Science</h3>
-      <p>Use calculators, experiments, and AI-powered science tools.</p>
-      <a href="/science.html" class="btn text-blue-600 mt-2 inline-block">Science Tools</a>
+<!-- TV / IPTV Section -->
+<div class="section">
+  <h2>📺 TV / IPTV</h2>
+  <input type="text" id="tvSearch" placeholder="Search TV channel..." onkeyup="searchTV()">
+  <select id="tvSelect" size="6" onchange="playTV()"></select>
+  <div class="tv-frame">
+    <video id="tvPlayer" controls></video>
+    <div id="guideOverlay" style="display:none;">
+      <img id="guideImg" src="" alt="Guide Slide">
+      <div id="guideText"></div>
     </div>
   </div>
-
-  <div class="media-player text-center bg-gray-800 p-6 mt-6">
-    <h2 class="text-white text-2xl mb-4">🎧 Featured Media</h2>
-    <video controls class="mx-auto w-full max-w-md rounded">
-      <source src="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4" type="video/mp4">
-      Your browser does not support the video tag.
-    </video>
-    <div class="control-bar mt-4 space-x-4">
-      <button onclick="document.querySelector('video').play()">▶ Play</button>
-      <button onclick="document.querySelector('video').pause()">⏸ Pause</button>
-      <button onclick="document.querySelector('video').currentTime=0; document.querySelector('video').pause()">⏹ Stop</button>
-    </div>
+  <div class="remote">
+    <button onclick="prevTV()">⏮ Prev</button>
+    <button onclick="playTV()">▶️ Play</button>
+    <button onclick="pauseTV()">⏸ Pause</button>
+    <button onclick="stopTV()">⏹ Stop</button>
+    <button onclick="toggleMuteTV()">🔇 Mute</button>
+    <button onclick="nextTV()">⏭ Next</button>
+    <button onclick="switchToGuide()">📺 Guide</button>
+    <!-- Numeric keypad -->
+    <button onclick="pressNumber(1)">1</button>
+    <button onclick="pressNumber(2)">2</button>
+    <button onclick="pressNumber(3)">3</button>
+    <button onclick="pressNumber(4)">4</button>
+    <button onclick="pressNumber(5)">5</button>
+    <button onclick="pressNumber(6)">6</button>
+    <button onclick="pressNumber(7)">7</button>
+    <button onclick="pressNumber(8)">8</button>
+    <button onclick="pressNumber(9)">9</button>
+    <button onclick="pressNumber(0)">0</button>
+    <button onclick="goToChannel()">Enter</button>
+    <button onclick="infoTV()">ℹ️ Info</button>
   </div>
+</div>
 
-  <footer class="bg-gray-900 text-gray-200 text-center p-6 mt-8">
-    <p>&copy; 2025 TitusMukisaMJToward. All rights reserved.</p>
-  </footer>
+<!-- FM Section -->
+<div class="section">
+  <h2>📻 FM Radio</h2>
+  <input type="text" id="fmSearch" placeholder="Search FM station..." onkeyup="searchFM()">
+  <select id="fmSelect" size="6" onchange="playFM()"></select>
+  <audio id="fmPlayer" controls></audio>
+  <div class="remote">
+    <button onclick="prevFM()">⏮ Prev</button>
+    <button onclick="playFM()">▶️ Play</button>
+    <button onclick="pauseFM()">⏸ Pause</button>
+    <button onclick="stopFM()">⏹ Stop</button>
+    <button onclick="toggleMuteFM()">🔇 Mute</button>
+    <button onclick="nextFM()">⏭ Next</button>
+  </div>
+</div>
+
+<!-- Audio Section -->
+<div class="section">
+  <h2>🎶 Audio / Music</h2>
+  <input type="text" id="audioSearch" placeholder="Search audio..." onkeyup="searchAudio()">
+  <input type="file" id="audioUpload" accept="audio/*" onchange="uploadAudio()">
+  <select id="audioSelect" size="6" onchange="playAudio()"></select>
+  <audio id="audioPlayer" controls></audio>
+  <button onclick="downloadAudio()">⬇ Download Selected</button>
+</div>
+
+<!-- Video Section -->
+<div class="section">
+  <h2>🎥 Video / Movies</h2>
+  <input type="text" id="videoSearch" placeholder="Search video..." onkeyup="searchVideo()">
+  <input type="file" id="videoUpload" accept="video/*" onchange="uploadVideo()">
+  <select id="videoSelect" size="6" onchange="playVideo()"></select>
+  <video id="videoPlayer" controls></video>
+  <button onclick="downloadVideo()">⬇ Download Selected</button>
+</div>
+
+<!-- Subscription Section -->
+<div class="section">
+  <h2>💳 Subscription Access</h2>
+  <p>Select a plan to unlock premium IPTV & Radio channels:</p>
+  <button onclick="subscribe('1h')">⏱ 1 Hour</button>
+  <button onclick="subscribe('1d')">📆 1 Day</button>
+  <button onclick="subscribe('1m')">🗓 1 Month</button>
+  <button onclick="subscribe('unlimited')">♾ Unlimited</button>
+  <p id="subStatus">Status: Free Mode</p>
+</div>
+
+<script>
+// --- Media Lists ---
+let tvChannels=[
+  {name:"Guide Channel",url:"guide"},
+  {name:"BBC News",url:"https://example.com/bbc.m3u8"},
+  {name:"CNN",url:"https://example.com/cnn.m3u8"},
+  {name:"Al Jazeera",url:"https://example.com/aljazeera.m3u8"},
+  {name:"Food Network",url:"https://example.com/foodnetwork.m3u8"},
+  {name:"Discovery Channel",url:"https://example.com/discovery.m3u8"}
+];
+let fmStations=[
+  {name:"Capital FM 91.3",url:"http://stream.zeno.fm/ssn0z7z0qd0uv"},
+  {name:"CBS FM 88.8",url:"http://stream.zeno.fm/qnydx59r0ueuv"},
+  {name:"BBC World Service",url:"http://stream.zeno.fm/gy7x3a9t6f8uv"}
+];
+let audioTracks=[], videoClips=[];
+
+// --- Load Lists ---
+function loadLists(){
+  const tvSel=document.getElementById("tvSelect"); tvSel.innerHTML=""; tvChannels.forEach(c=>tvSel.add(new Option(c.name,c.url)));
+  const fmSel=document.getElementById("fmSelect"); fmSel.innerHTML=""; fmStations.forEach(s=>fmSel.add(new Option(s.name,s.url)));
+  refreshAudio(); refreshVideo();
+}
+
+// --- Search ---
+function searchTV(){ let q=document.getElementById("tvSearch").value.toLowerCase(); let sel=document.getElementById("tvSelect"); sel.innerHTML=""; tvChannels.filter(c=>c.name.toLowerCase().includes(q)).forEach(c=>sel.add(new Option(c.name,c.url))); }
+function searchFM(){ let q=document.getElementById("fmSearch").value.toLowerCase(); let sel=document.getElementById("fmSelect"); sel.innerHTML=""; fmStations.filter(s=>s.name.toLowerCase().includes(q)).forEach(s=>sel.add(new Option(s.name,s.url))); }
+function searchAudio(){ let q=document.getElementById("audioSearch").value.toLowerCase(); let sel=document.getElementById("audioSelect"); sel.innerHTML=""; audioTracks.filter(a=>a.name.toLowerCase().includes(q)).forEach(a=>sel.add(new Option(a.name,a.url))); }
+function searchVideo(){ let q=document.getElementById("videoSearch").value.toLowerCase(); let sel=document.getElementById("videoSelect"); sel.innerHTML=""; videoClips.filter(v=>v.name.toLowerCase().includes(q)).forEach(v=>sel.add(new Option(v.name,v.url))); }
+
+// --- TV Controls ---
+let tvIndex=0, tvPlayer=document.getElementById("tvPlayer");
+let numBuffer="";
+function playTV(){ let url=document.getElementById("tvSelect").value; if(url==="guide"){ startGuide(); } else { stopGuide(); tvPlayer.src=url; tvPlayer.play(); } }
+function pauseTV(){ tvPlayer.pause(); }
+function stopTV(){ tvPlayer.pause(); tvPlayer.currentTime=0; }
+function toggleMuteTV(){ tvPlayer.muted=!tvPlayer.muted; }
+function nextTV(){ tvIndex=(tvIndex+1)%tvChannels.length; document.getElementById("tvSelect").value=tvChannels[tvIndex].url; playTV(); }
+function prevTV(){ tvIndex=(tvIndex-1+tvChannels.length)%tvChannels.length; document.getElementById("tvSelect").value=tvChannels[tvIndex].url; playTV(); }
+function pressNumber(n){ numBuffer+=n; }
+function goToChannel(){ let idx=parseInt(numBuffer)-1; if(idx>=0 && idx<tvChannels.length){ tvIndex=idx; document.getElementById("tvSelect").value=tvChannels[idx].url; playTV(); } numBuffer=""; }
+function infoTV(){ alert("Channel Info: "+tvChannels[tvIndex].name); }
+
+// --- Guide Channel with Images ---
+let guideSlides=[
+  {img:"https://picsum.photos/800/400?random=1", text:"Welcome to the Guide Channel!"},
+  {img:"https://picsum.photos/800/400?random=2", text:"Use the Remote to control your media easily."},
+  {img:"https://picsum.photos/800/400?random=3", text:"Upload and download your own audio & video."},
+  {img:"https://picsum.photos/800/400?random=4", text:"Subscribe for premium channels."},
+  {img:"https://picsum.photos/800/400?random=5", text:"Enjoy movies, music, TV & FM in one hub."}
+];
+let guideIndex=0, guideTimer;
+function startGuide(){
+  stopGuide();
+  document.getElementById("guideOverlay").style.display="flex";
+  showGuideSlide();
+}
+function showGuideSlide(){
+  let slide=guideSlides[guideIndex];
+  document.getElementById("guideImg").src=slide.img;
+  document.getElementById("guideText").innerText=slide.text;
+  guideIndex=(guideIndex+1)%guideSlides.length;
+  guideTimer=setTimeout(showGuideSlide,4000);
+}
+function stopGuide(){
+  clearTimeout(guideTimer);
+  document.getElementById("guideOverlay").style.display="none";
+}
+function switchToGuide(){ document.getElementById("tvSelect").value="guide"; playTV(); }
+
+// --- FM Controls ---
+let fmIndex=0, fmPlayer=document.getElementById("fmPlayer");
+function playFM(){ fmPlayer.src=document.getElementById("fmSelect").value; fmPlayer.play(); }
+function pauseFM(){ fmPlayer.pause(); }
+function stopFM(){ fmPlayer.pause(); fmPlayer.currentTime=0; }
+function toggleMuteFM(){ fmPlayer.muted=!fmPlayer.muted; }
+function nextFM(){ fmIndex=(fmIndex+1)%fmStations.length; document.getElementById("fmSelect").value=fmStations[fmIndex].url; playFM(); }
+function prevFM(){ fmIndex=(fmIndex-1+fmStations.length)%fmStations.length; document.getElementById("fmSelect").value=fmStations[fmIndex].url; playFM(); }
+
+// --- Audio/Video Upload & Play ---
+const audioPlayer=document.getElementById("audioPlayer");
+const videoPlayer=document.getElementById("videoPlayer");
+function uploadAudio(){ const file=document.getElementById("audioUpload").files[0]; if(file){ const url=URL.createObjectURL(file); audioTracks.push({name:file.name,url}); refreshAudio(); } }
+function uploadVideo(){ const file=document.getElementById("videoUpload").files[0]; if(file){ const url=URL.createObjectURL(file); videoClips.push({name:file.name,url}); refreshVideo(); } }
+function refreshAudio(){ let sel=document.getElementById("audioSelect"); sel.innerHTML=""; audioTracks.forEach(a=>sel.add(new Option(a.name,a.url))); }
+function refreshVideo(){ let sel=document.getElementById("videoSelect"); sel.innerHTML=""; videoClips.forEach(v=>sel.add(new Option(v.name,v.url))); }
+function playAudio(){ audioPlayer.src=document.getElementById("audioSelect").value; audioPlayer.play(); }
+function playVideo(){ videoPlayer.src=document.getElementById("videoSelect").value; videoPlayer.play(); }
+function downloadAudio(){ let url=document.getElementById("audioSelect").value; if(url) window.open(url,"_blank"); }
+function downloadVideo(){ let url=document.getElementById("videoSelect").value; if(url) window.open(url,"_blank"); }
+
+// --- Subscription ---
+function subscribe(plan){ document.getElementById("subStatus").innerText="Status: Subscribed ("+plan+")"; }
+
+window.onload=loadLists;
+</script>
 </body>
 </html>
