@@ -1,20 +1,13 @@
 {
-  "name": "universal-media-hub-frontend",
+  "name": "titus-backend",
   "version": "1.0.0",
-  "private": true,
+  "main": "api/index.js",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "start": "node api/index.js"
   },
   "dependencies": {
-    "axios": "^1.5.0",
-    "react": "^18.3.0",
-    "react-dom": "^18.3.0",
-    "react-router-dom": "^6.15.0"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-react": "^4.0.0",
-    "vite": "^4.5.0"
+    "express": "^4.19.0",
+    "multer": "^1.4.5",
+    "cors": "^2.8.5"
   }
 }
