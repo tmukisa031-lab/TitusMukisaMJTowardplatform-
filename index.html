@@ -1,13 +1,557 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Universal Media Hub</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+<meta charset="UTF-8" />
+<link rel="icon" type="image/svg+xml" href="/vite.svg" />
+<title>Universal Media Hub</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<style>
+  :root{--bg:#0b0b0f;--card:#17171b;--accent:#00e6d0;--muted:#aab3b9;--glass:rgba(255,255,255,0.04)}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:#eee;line-height:1.3}
+  header{padding:18px 16px;text-align:center}
+  h1{margin:0;color:var(--accent);font-size:20px}
+  .wrap{max-width:1100px;margin:14px auto;padding:12px}
+  .grid{display:grid;grid-template-columns:1fr;gap:14px}
+  @media(min-width:920px){.grid{grid-template-columns:1fr 420px}}
+  .section{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 6px 22px rgba(0,0,0,0.6);position:relative}
+  .tv-frame{background:#030304;border-radius:12px;border:10px solid #131318;height:360px;overflow:hidden;display:flex;align-items:center;justify-content:center;position:relative}
+  video,audio{width:100%;height:100%;max-height:100%;background:#000;border-radius:6px}
+  .controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;justify-content:center}
+  .btn{background:#111;border:1px solid rgba(255,255,255,0.03);color:var(--accent);padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:600}
+  .btn.ghost{background:transparent;color:var(--muted)}
+  .btn.warn{color:#ffb86b}
+  input[type=text],select{width:100%;padding:10px;border-radius:8px;border:none;background:var(--glass);color:#fff}
+  .remote{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px}
+  .overlay{position:absolute;left:12px;top:12px;background:linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0.35));padding:8px 10px;border-radius:8px;backdrop-filter:blur(4px)}
+  .overlay.small{font-size:13px;color:var(--muted)}
+  .big-display{position:absolute;right:12px;top:12px;background:rgba(0,0,0,0.55);padding:10px 12px;border-radius:8px;font-weight:700}
+  .num-display{position:absolute;bottom:12px;left:12px;background:rgba(0,0,0,0.7);padding:6px 10px;border-radius:8px;font-size:18px;color:var(--accent)}
+  .guide-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(2,6,10,0.6);padding:12px;gap:8px;transition:opacity .25s;backdrop-filter:blur(4px)}
+  .guide-overlay img{max-width:92%;max-height:68%;border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,0.6)}
+  .caption{background:rgba(0,0,0,0.5);padding:8px 12px;border-radius:8px;color:#e9faf6}
+  .list-row{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:8px;background:transparent;border-radius:8px}
+  .list-row:hover{background:rgba(255,255,255,0.02)}
+  .small{font-size:13px;color:var(--muted)}
+  .file-actions button{margin-left:6px}
+  footer{padding:12px;text-align:center;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body class="bg-gray-900 text-white"></body>
+<body>
+  <div id="root"></div>
+<header><h1>🌍 Universal Media Hub — Active Build</h1></header>
+<main class="wrap">
+  <div class="grid">
+
+    <!-- LEFT COLUMN: TV + FM + Guide -->
+    <div class="section">
+      <h2 style="margin:6px 0;color:var(--accent)">📺 TV / IPTV</h2>
+
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+        <input id="tvSearch" type="text" placeholder="Search channels..." oninput="searchTV()" />
+        <select id="tvSelect" size="4" style="width:200px" onchange="onSelectTV()"></select>
+      </div>
+
+      <div class="tv-frame" id="tvFrame">
+        <video id="tvPlayer" controls playsinline></video>
+
+        <!-- overlay elements -->
+        <div class="overlay" id="nowPlaying">Now: —</div>
+        <div class="big-display" id="subStatusSmall">Free Mode</div>
+        <div class="num-display" id="numDisplay" style="display:none">123</div>
+
+        <!-- Guide overlay (slideshow) -->
+        <div id="guideOverlay" class="guide-overlay" style="display:none">
+          <img id="guideImg" src="" alt="slide" />
+          <div class="caption" id="guideText">Caption</div>
+          <div class="small" id="guideIndexDisplay">Slide 1 of 5</div>
+        </div>
+      </div>
+
+      <!-- remote / keypad -->
+      <div class="remote" style="margin-top:12px">
+        <button class="btn" onclick="prevTV()">⏮ Prev</button>
+        <button class="btn" onclick="playTV()">▶ Play</button>
+        <button class="btn" onclick="pauseTV()">⏸ Pause</button>
+        <button class="btn" onclick="stopTV()">⏹ Stop</button>
+        <button class="btn" onclick="toggleMuteTV()">🔇 Mute</button>
+        <button class="btn" onclick="nextTV()">⏭ Next</button>
+
+        <button class="btn" onclick="switchToGuide()">📺 Guide</button>
+        <button class="btn" onclick="prevGuideSlide()">Guide ⏮</button>
+        <button class="btn" onclick="nextGuideSlide()">Guide ⏭</button>
+        <button class="btn" onclick="pauseGuide()">Guide ⏸</button>
+        <button class="btn" onclick="resumeGuide()">Guide ▶</button>
+      </div>
+
+      <div style="margin-top:10px" class="remote">
+        <!-- numeric keypad (press shows digits) -->
+        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:420px">
+          <button class="btn" onclick="pressNumber(1)">1</button>
+          <button class="btn" onclick="pressNumber(2)">2</button>
+          <button class="btn" onclick="pressNumber(3)">3</button>
+          <button class="btn" onclick="pressNumber(4)">4</button>
+          <button class="btn" onclick="pressNumber(5)">5</button>
+          <button class="btn" onclick="pressNumber(6)">6</button>
+          <button class="btn" onclick="pressNumber(7)">7</button>
+          <button class="btn" onclick="pressNumber(8)">8</button>
+          <button class="btn" onclick="pressNumber(9)">9</button>
+          <button class="btn" onclick="pressNumber(0)">0</button>
+          <button class="btn" onclick="clearNum()">Clear</button>
+          <button class="btn" onclick="goToChannel()">Enter</button>
+        </div>
+      </div>
+
+      <!-- FM -->
+      <hr style="border:none;border-top:1px solid rgba(255,255,255,0.03);margin:14px 0" />
+      <h3 style="margin:0 0 8px 0;color:var(--accent)">📻 FM Radio</h3>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+        <input id="fmSearch" type="text" placeholder="Search stations..." oninput="searchFM()" />
+        <select id="fmSelect" size="4" style="width:200px" onchange="onSelectFM()"></select>
+      </div>
+      <audio id="fmPlayer" controls style="width:100%"></audio>
+      <div class="remote" style="margin-top:8px">
+        <button class="btn" onclick="prevFM()">⏮ Prev</button>
+        <button class="btn" onclick="playFM()">▶ Play</button>
+        <button class="btn" onclick="pauseFM()">⏸ Pause</button>
+        <button class="btn" onclick="stopFM()">⏹ Stop</button>
+        <button class="btn" onclick="toggleMuteFM()">🔇 Mute</button>
+        <button class="btn" onclick="nextFM()">⏭ Next</button>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: Audio + Video + Subscription -->
+    <div>
+      <div class="section" style="margin-bottom:12px">
+        <h3 style="margin:6px 0;color:var(--accent)">🎶 Audio / Music</h3>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="audioSearch" type="text" placeholder="Search audio..." oninput="searchAudio()" />
+          <input id="audioUpload" type="file" accept="audio/*" style="width:160px" onchange="uploadAudio()" />
+        </div>
+        <div id="audioList" style="margin-top:8px;max-height:220px;overflow:auto"></div>
+        <audio id="audioPlayer" controls style="width:100%;margin-top:8px"></audio>
+      </div>
+
+      <div class="section" style="margin-bottom:12px">
+        <h3 style="margin:6px 0;color:var(--accent)">🎥 Video / Movies</h3>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="videoSearch" type="text" placeholder="Search video..." oninput="searchVideo()" />
+          <input id="videoUpload" type="file" accept="video/*" style="width:160px" onchange="uploadVideo()" />
+        </div>
+        <div id="videoList" style="margin-top:8px;max-height:220px;overflow:auto"></div>
+        <video id="videoPlayer" controls style="width:100%;margin-top:8px;height:200px"></video>
+      </div>
+
+      <div class="section">
+        <h3 style="margin:6px 0;color:var(--accent)">💳 Subscription</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" onclick="subscribe('1h')">⏱ 1 Hour</button>
+          <button class="btn" onclick="subscribe('1d')">📆 1 Day</button>
+          <button class="btn" onclick="subscribe('1m')">🗓 1 Month</button>
+          <button class="btn" onclick="subscribe('unlimited')">♾ Unlimited</button>
+        </div>
+        <div style="margin-top:10px">
+          <div id="subInfo" class="small">Status: Free Mode</div>
+          <div id="subTimer" class="small" style="margin-top:6px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>Built for you — all controls active. Uploads are local to your browser (no server).</footer>
+<script type="module" src="/src/main.tsx"></script>
+<script>
+/* -------------------------
+   Data & DOM references
+   -------------------------*/
+const tvPlayer = document.getElementById('tvPlayer');
+const fmPlayer = document.getElementById('fmPlayer');
+const audioPlayer = document.getElementById('audioPlayer');
+const videoPlayer = document.getElementById('videoPlayer');
+const tvSelect = document.getElementById('tvSelect');
+const fmSelect = document.getElementById('fmSelect');
+const numDisplay = document.getElementById('numDisplay');
+const nowPlaying = document.getElementById('nowPlaying');
+const guideOverlay = document.getElementById('guideOverlay');
+const guideImg = document.getElementById('guideImg');
+const guideText = document.getElementById('guideText');
+const guideIndexDisplay = document.getElementById('guideIndexDisplay');
+const subInfo = document.getElementById('subInfo');
+const subStatusSmall = document.getElementById('subStatusSmall');
+const subTimer = document.getElementById('subTimer');
+
+let tvChannels = [
+  {name:"Guide Channel", url:"guide"},
+  {name:"BBC News", url:"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"},
+  {name:"CNN (demo)", url:"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"},
+  {name:"Al Jazeera", url:"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"},
+  {name:"Food Network", url:"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"},
+  {name:"Discovery", url:"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"},
+];
+
+let fmStations = [
+  {name:"Capital FM 91.3", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"},
+  {name:"CBS FM 88.8", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"},
+  {name:"BBC World Service", url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"},
+];
+
+let audioTracks = []; // {id, name, blob, url}
+let videoClips = [];  // {id, name, blob, url}
+
+/* -------------------------
+   Initialization
+   -------------------------*/
+function loadLists(){
+  tvSelect.innerHTML=''; tvChannels.forEach((c,i)=> tvSelect.add(new Option(`${i+1}. ${c.name}`, c.url)));
+  fmSelect.innerHTML=''; fmStations.forEach((s,i)=> fmSelect.add(new Option(`${i+1}. ${s.name}`, s.url)));
+  refreshAudioList(); refreshVideoList();
+  updateNowPlaying('—');
+}
+window.addEventListener('load', loadLists);
+
+/* -------------------------
+   Searching helpers
+   -------------------------*/
+function searchTV(){
+  const q = document.getElementById('tvSearch').value.toLowerCase();
+  tvSelect.innerHTML = '';
+  tvChannels.filter((c)=>c.name.toLowerCase().includes(q)).forEach((c,i)=> tvSelect.add(new Option(c.name, c.url)));
+}
+function searchFM(){
+  const q = document.getElementById('fmSearch').value.toLowerCase();
+  fmSelect.innerHTML = '';
+  fmStations.filter((s)=>s.name.toLowerCase().includes(q)).forEach((s)=> fmSelect.add(new Option(s.name, s.url)));
+}
+
+/* -------------------------
+   TV controls & numeric entry
+   -------------------------*/
+let tvIndex = 0;
+let numBuffer = '';
+let numTimeout;
+function onSelectTV(){
+  // find index by url/name match
+  const val = tvSelect.value;
+  const idx = tvChannels.findIndex(c => c.url === val || c.name === val);
+  if(idx>=0) tvIndex = idx;
+  playTV();
+}
+function playTV(){
+  const url = tvSelect.value;
+  if(url === 'guide'){
+    startGuide();
+    updateNowPlaying('Guide Channel');
+    return;
+  }
+  stopGuide();
+  tvPlayer.src = url;
+  tvPlayer.play().catch(()=>{});
+  updateNowPlaying(tvChannels[tvIndex]?.name || 'Unknown');
+}
+function pauseTV(){ tvPlayer.pause(); }
+function stopTV(){ tvPlayer.pause(); tvPlayer.currentTime = 0; }
+function toggleMuteTV(){ tvPlayer.muted = !tvPlayer.muted; }
+function nextTV(){ tvIndex = (tvIndex + 1) % tvChannels.length; tvSelect.value = tvChannels[tvIndex].url; playTV(); }
+function prevTV(){ tvIndex = (tvIndex - 1 + tvChannels.length) % tvChannels.length; tvSelect.value = tvChannels[tvIndex].url; playTV(); }
+
+function pressNumber(n){
+  // show buffer on-screen
+  numBuffer += String(n);
+  showNumBuffer();
+  clearTimeout(numTimeout);
+  numTimeout = setTimeout(()=>{numBuffer=''; hideNumBuffer();}, 4000);
+}
+function showNumBuffer(){
+  numDisplay.style.display='block';
+  numDisplay.innerText = numBuffer;
+}
+function hideNumBuffer(){
+  numDisplay.style.display='none';
+  numDisplay.innerText = '';
+}
+function clearNum(){ numBuffer=''; hideNumBuffer(); }
+function goToChannel(){
+  if(!numBuffer) return;
+  const idx = parseInt(numBuffer,10) - 1;
+  if(!isNaN(idx) && idx >= 0 && idx < tvChannels.length){
+    tvIndex = idx;
+    tvSelect.value = tvChannels[tvIndex].url;
+    playTV();
+  } else {
+    alert('Channel number out of range');
+  }
+  numBuffer=''; hideNumBuffer();
+}
+
+/* -------------------------
+   Now playing overlay
+   -------------------------*/
+function updateNowPlaying(text){
+  nowPlaying.innerText = 'Now: ' + text;
+}
+
+/* -------------------------
+   Guide slideshow (images+captions)
+   -------------------------*/
+let guideSlides = [
+  {img: 'https://picsum.photos/900/500?random=23', text: 'Welcome to the Guide Channel!'},
+  {img: 'https://picsum.photos/900/500?random=24', text: 'Use the Remote to control your media easily.'},
+  {img: 'https://picsum.photos/900/500?random=25', text: 'Upload & manage your own audio & video.'},
+  {img: 'https://picsum.photos/900/500?random=26', text: 'Subscribe for premium channels.'},
+  {img: 'https://picsum.photos/900/500?random=27', text: 'Enjoy movies, music, TV & FM in one hub.'}
+];
+let guideIndex = 0;
+let guideTimer = null;
+let guidePaused = false;
+
+function showGuideSlide(indexOverride){
+  if(typeof indexOverride === 'number') guideIndex = indexOverride;
+  const s = guideSlides[guideIndex];
+  guideImg.src = s.img;
+  guideText.innerText = s.text;
+  guideIndexDisplay.innerText = `Slide ${guideIndex+1} of ${guideSlides.length}`;
+}
+
+function startGuide(){
+  guidePaused = false;
+  guideOverlay.style.display = 'flex';
+  showGuideSlide(0);
+  clearTimeout(guideTimer);
+  guideTimer = setTimeout(autoGuideAdvance, 3500);
+}
+
+function autoGuideAdvance(){
+  if(guidePaused) return;
+  guideIndex = (guideIndex + 1) % guideSlides.length;
+  showGuideSlide();
+  guideTimer = setTimeout(autoGuideAdvance, 3500);
+}
+
+function stopGuide(){
+  guideOverlay.style.display = 'none';
+  clearTimeout(guideTimer);
+}
+
+function nextGuideSlide(){
+  clearTimeout(guideTimer);
+  guideIndex = (guideIndex + 1) % guideSlides.length;
+  showGuideSlide();
+  if(!guidePaused) guideTimer = setTimeout(autoGuideAdvance, 3500);
+}
+
+function prevGuideSlide(){
+  clearTimeout(guideTimer);
+  guideIndex = (guideIndex - 1 + guideSlides.length) % guideSlides.length;
+  showGuideSlide();
+  if(!guidePaused) guideTimer = setTimeout(autoGuideAdvance, 3500);
+}
+
+function pauseGuide(){
+  guidePaused = true;
+  clearTimeout(guideTimer);
+}
+function resumeGuide(){
+  if(!guideOverlay.style.display || guideOverlay.style.display==='none'){
+    guideOverlay.style.display = 'flex';
+    showGuideSlide();
+  }
+  guidePaused = false;
+  clearTimeout(guideTimer);
+  guideTimer = setTimeout(autoGuideAdvance, 3500);
+}
+function switchToGuide(){ tvSelect.value = 'guide'; playTV(); }
+
+/* -------------------------
+   FM Controls
+   -------------------------*/
+let fmIndex = 0;
+function onSelectFM(){
+  const val = fmSelect.value;
+  const idx = fmStations.findIndex(s => s.url === val || s.name === val);
+  if(idx >= 0) fmIndex = idx;
+  playFM();
+}
+function playFM(){ fmPlayer.src = fmSelect.value; fmPlayer.play().catch(()=>{}); updateNowPlaying(fmStations[fmIndex]?.name || 'FM'); }
+function pauseFM(){ fmPlayer.pause(); }
+function stopFM(){ fmPlayer.pause(); fmPlayer.currentTime = 0; }
+function toggleMuteFM(){ fmPlayer.muted = !fmPlayer.muted; }
+function nextFM(){ fmIndex = (fmIndex + 1) % fmStations.length; fmSelect.value = fmStations[fmIndex].url; playFM(); }
+function prevFM(){ fmIndex = (fmIndex - 1 + fmStations.length) % fmStations.length; fmSelect.value = fmStations[fmIndex].url; playFM(); }
+
+/* -------------------------
+   Audio / Video upload & list
+   -------------------------*/
+let audioId = 0, videoId = 0;
+
+function uploadAudio(){
+  const f = document.getElementById('audioUpload').files[0];
+  if(!f) return;
+  const url = URL.createObjectURL(f);
+  audioTracks.push({id:++audioId,name:f.name,blob:f,url});
+  refreshAudioList();
+  document.getElementById('audioUpload').value = '';
+}
+
+function uploadVideo(){
+  const f = document.getElementById('videoUpload').files[0];
+  if(!f) return;
+  const url = URL.createObjectURL(f);
+  videoClips.push({id:++videoId,name:f.name,blob:f,url});
+  refreshVideoList();
+  document.getElementById('videoUpload').value = '';
+}
+
+function refreshAudioList(filter=''){
+  const container = document.getElementById('audioList');
+  container.innerHTML = '';
+  audioTracks.filter(a=>a.name.toLowerCase().includes(filter.toLowerCase())).forEach(a=>{
+    const row = document.createElement('div'); row.className='list-row';
+    row.innerHTML = `<div style="flex:1"><strong>${a.name}</strong><div class="small">local</div></div>
+      <div class="file-actions">
+        <button class="btn" onclick="playAudioItem(${a.id})">Play</button>
+        <button class="btn ghost" onclick="downloadBlob(${a.id},'audio')">⬇</button>
+        <button class="btn warn" onclick="deleteAudio(${a.id})">Delete</button>
+      </div>`;
+    container.appendChild(row);
+  });
+}
+
+function refreshVideoList(filter=''){
+  const container = document.getElementById('videoList');
+  container.innerHTML = '';
+  videoClips.filter(v=>v.name.toLowerCase().includes(filter.toLowerCase())).forEach(v=>{
+    const row = document.createElement('div'); row.className='list-row';
+    row.innerHTML = `<div style="flex:1"><strong>${v.name}</strong><div class="small">local</div></div>
+      <div class="file-actions">
+        <button class="btn" onclick="playVideoItem(${v.id})">Play</button>
+        <button class="btn ghost" onclick="downloadBlob(${v.id},'video')">⬇</button>
+        <button class="btn warn" onclick="deleteVideo(${v.id})">Delete</button>
+      </div>`;
+    container.appendChild(row);
+  });
+}
+
+function playAudioItem(id){
+  const item = audioTracks.find(a=>a.id===id);
+  if(!item) return;
+  audioPlayer.src = item.url;
+  audioPlayer.play().catch(()=>{});
+  updateNowPlaying(item.name);
+}
+function playVideoItem(id){
+  const item = videoClips.find(v=>v.id===id);
+  if(!item) return;
+  videoPlayer.src = item.url;
+  videoPlayer.play().catch(()=>{});
+  updateNowPlaying(item.name);
+}
+
+function deleteAudio(id){
+  const idx = audioTracks.findIndex(a=>a.id===id);
+  if(idx>=0){
+    URL.revokeObjectURL(audioTracks[idx].url);
+    audioTracks.splice(idx,1);
+    refreshAudioList();
+  }
+}
+function deleteVideo(id){
+  const idx = videoClips.findIndex(v=>v.id===id);
+  if(idx>=0){
+    URL.revokeObjectURL(videoClips[idx].url);
+    videoClips.splice(idx,1);
+    refreshVideoList();
+  }
+}
+
+function downloadBlob(id,type){
+  const arr = type==='audio' ? audioTracks : videoClips;
+  const item = arr.find(x=>x.id===id);
+  if(!item) return;
+  // Use blob/url from file object if available
+  const link = document.createElement('a');
+  link.href = item.url;
+  link.download = item.name;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+
+/* -------------------------
+   Search lists hooks
+   -------------------------*/
+document.getElementById('audioSearch').addEventListener('input', e=>{
+  refreshAudioList(e.target.value);
+});
+document.getElementById('videoSearch').addEventListener('input', e=>{
+  refreshVideoList(e.target.value);
+});
+
+/* -------------------------
+   Subscription (demo countdown)
+   -------------------------*/
+let subTimeout = null;
+let subExpiry = null;
+
+function subscribe(plan){
+  // demo durations (ms)
+  const now = Date.now();
+  let ms = 0;
+  if(plan==='1h') ms = 60*60*1000;
+  else if(plan==='1d') ms = 24*60*60*1000;
+  else if(plan==='1m') ms = 30*24*60*60*1000;
+  else if(plan==='unlimited') ms = 10*365*24*60*60*1000; // effectively long
+  subExpiry = now + ms;
+  subInfo.innerText = `Status: Subscribed (${plan})`;
+  subStatusSmall.innerText = `Subscribed (${plan})`;
+  startSubTimer();
+}
+
+function startSubTimer(){
+  clearInterval(subTimeout);
+  subTimeout = setInterval(()=>{
+    const remaining = subExpiry - Date.now();
+    if(remaining <= 0){
+      clearInterval(subTimeout);
+      subExpiry = null;
+      subInfo.innerText = 'Status: Free Mode';
+      subStatusSmall.innerText = 'Free Mode';
+      subTimer.innerText = '';
+      return;
+    }
+    subTimer.innerText = 'Expires in: ' + formatMs(remaining);
+  }, 1000);
+}
+
+function formatMs(ms){
+  const s = Math.floor(ms/1000)%60;
+  const m = Math.floor(ms/60000)%60;
+  const h = Math.floor(ms/3600000)%24;
+  const d = Math.floor(ms/86400000);
+  if(d>0) return `${d}d ${h}h ${m}m`;
+  if(h>0) return `${h}h ${m}m ${s}s`;
+  return `${m}m ${s}s`;
+}
+
+/* -------------------------
+   Misc helpers & bindings
+   -------------------------*/
+function refreshAudioListOnLoad(){ refreshAudioList(); }
+function refreshVideoListOnLoad(){ refreshVideoList(); }
+
+function updateNowPlayingFromPlayers(){
+  // update when media plays
+  tvPlayer.onplay = ()=> updateNowPlaying(tvChannels[tvIndex]?.name || 'TV');
+  fmPlayer.onplay = ()=> updateNowPlaying(fmStations[fmIndex]?.name || 'FM');
+  audioPlayer.onplay = ()=> updateNowPlaying('Audio: ' + (audioPlayer.src.split('/').pop()||'playing'));
+  videoPlayer.onplay = ()=> updateNowPlaying('Video: ' + (videoPlayer.src.split('/').pop()||'playing'));
+}
+updateNowPlayingFromPlayers();
+
+/* Ensure lists reflect initial items */
+loadLists();
+
+</script>
+</body>
 </html>
