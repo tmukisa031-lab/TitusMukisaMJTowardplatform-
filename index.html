@@ -4,6 +4,14 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Universal Media Hub</title>
+<meta property="og:title" content="Universal Media Hub" />
+<meta property="og:description" content="Watch, listen, and stream globally!" />
+<meta property="og:image" content="https://yourdomain.com/banner.jpg" />
+<meta property="og:url" content="https://yourdomain.com" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="manifest" href="/manifest.json" />
+<link rel="icon" type="image/png" href="/logo.png" />
+<link rel="icon" href="/favicon.ico" />
 <style>
   body { font-family: Arial, sans-serif; background:#111; color:#eee; margin:0; padding:0; text-align:center; }
   h1,h2 { color:#0ff; margin:10px 0; }
@@ -16,9 +24,9 @@
   .remote button { flex: 1 0 60px; }
   #guideOverlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:none; flex-direction:column; justify-content:center; align-items:center; color:#0ff; font-size:20px; font-weight:bold; text-shadow:2px 2px 4px #000; }
   #guideOverlay img { max-width:90%; max-height:70%; margin-bottom:10px; border-radius:12px; box-shadow:0 0 20px rgba(0,0,0,0.8); }
-  num-display{position:absolute;bottom:12px;left:12px;background:rgba(0,0,0,0.7);padding:6px 10px;border-radius:8px;font-size:18px;color:var(--accent)}
-  .tv-frame{ width:100%; max-width:900px; height1110px; background:#111; border:15px solid #333; border-radius:15px; box-shadow:0 0 40px rgba(0,0,0,0.8); overflow:hidden; position:relative; margin:0 auto; }
+  .tv-frame{ width:100%; max-width:900px; height:200px; background:#111; border:15px solid #333; border-radius:15px; box-shadow:0 0 40px rgba(0,0,0,0.8); overflow:hidden; position:relative; margin:0 auto; }
   select { max-height:200px; overflow-y:auto; }
+  #paymentForm input{width:90%; margin:5px auto; display:block;}
 </style>
 </head>
 <body>
@@ -30,14 +38,14 @@
   <h2>📺 TV / IPTV</h2>
   <input type="text" id="tvSearch" placeholder="Search TV channel...">
   <select id="tvSelect"></select>
-  <div class="tv-frame",>
+  <div class="tv-frame">
     <video id="tvPlayer" controls></video>
     <div id="guideOverlay">
       <img id="guideImg" src="" alt="Guide Slide">
       <div id="guideText"></div>
     </div>
   </div>
-  <div style="margin-top:10px" class="remote" >
+  <div style="margin-top:10px" class="remote">
     <button onclick="prevTV()">⏮ Prev</button>
     <button onclick="playTV()">▶️ Play</button>
     <button onclick="pauseTV()">⏸ Pause</button>
@@ -46,22 +54,20 @@
     <button onclick="nextTV()">⏭ Next</button>
     <button onclick="switchToGuide()">📺 Guide</button>
     <button onclick="infoTV()">ℹ️ Info</button>
-        <!-- numeric keypad (press shows digits) -->
-        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:420px">
-          <button class="btn" onclick="pressNumber(1)">1</button>
-          <button class="btn" onclick="pressNumber(2)">2</button>
-          <button class="btn" onclick="pressNumber(3)">3</button>
-          <button class="btn" onclick="pressNumber(4)">4</button>
-          <button class="btn" onclick="pressNumber(5)">5</button>
-          <button class="btn" onclick="pressNumber(6)">6</button>
-          <button class="btn" onclick="pressNumber(7)">7</button>
-          <button class="btn" onclick="pressNumber(8)">8</button>
-          <button class="btn" onclick="pressNumber(9)">9</button>
-          <button class="btn" onclick="pressNumber(0)">0</button>
-          <button class="btn" onclick="clearNum()">Clear</button>
-          <button class="btn" onclick="goToChannel()">Enter</button>
-        </div>
-      
+    <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:420px">
+      <button class="btn" onclick="pressNumber(1)">1</button>
+      <button class="btn" onclick="pressNumber(2)">2</button>
+      <button class="btn" onclick="pressNumber(3)">3</button>
+      <button class="btn" onclick="pressNumber(4)">4</button>
+      <button class="btn" onclick="pressNumber(5)">5</button>
+      <button class="btn" onclick="pressNumber(6)">6</button>
+      <button class="btn" onclick="pressNumber(7)">7</button>
+      <button class="btn" onclick="pressNumber(8)">8</button>
+      <button class="btn" onclick="pressNumber(9)">9</button>
+      <button class="btn" onclick="pressNumber(0)">0</button>
+      <button class="btn" onclick="clearNum()">Clear</button>
+      <button class="btn" onclick="goToChannel()">Enter</button>
+    </div>
   </div>
 </div>
 
@@ -78,7 +84,6 @@
     <button onclick="stopFM()">⏹ Stop</button>
     <button onclick="toggleMuteFM()">🔇 Mute</button>
     <button onclick="nextFM()">⏭ Next</button>
-
   </div>
 </div>
 
@@ -100,51 +105,83 @@
   <select id="videoSelect" size="6"></select>
   <video id="videoPlayer" controls></video>
   <button onclick="downloadVideo()">⬇ Download Selected</button>
-
 </div>
 
 <!-- Subscription Section -->
 <div class="section">
   <h2>💳 Subscription Access</h2>
   <p>Select a plan to unlock premium IPTV & Radio channels:</p>
+  <input type="text" id="subscriberPhone" placeholder="Phone (+256)">
   <button onclick="subscribe('1h')">⏱ 1 Hour</button>
   <button onclick="subscribe('1d')">📆 1 Day</button>
+  <button onclick="subscribe('1w')">📅 1 Week</button>
   <button onclick="subscribe('1m')">🗓 1 Month</button>
   <button onclick="subscribe('unlimited')">♾ Unlimited</button>
   <p id="subStatus">Status: Free Mode</p>
+  <input type="number" id="amountPaid" placeholder="Amount Paid (UGX)" style="display:none;">
 </div>
 
 <script>
+// --- Plan Prices ---
+const PLAN_PRICES = { "1h": 250, "1d": 1000, "1w": 5000, "1m": 12000 };
+
 // --- TV Channels ---
-const tvChannels = [
-  { name: "Guide Channel", url: "guide" },
-  { name: "BBC News", url: "https://live-hls-web-aje.getaj.net/AJE/01.m3u8" },
-  { name: "DW News", url: "https://dwstream3-lh.akamaihd.net/i/dwstream3_live@124409/master.m3u8" },
-  { name: "Red Bull TV", url: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_3360.m3u8" },
-  { name: "MovieSphere", url: "https://moviesphere-samsungus.amagi.tv/playlist.m3u8" },
-  {name:"Bukeddetv",url:"www.bukedde.co.ug"},
-  {name:"dailymotion",url:"https://stream-02.sg1.dailymotion.com/sec(...)/master.m3u8"}
+let tvChannels = [
+  { name: "Guide Channel", url: "guide", premium: false, locked: false, free: true },
+  { name: "Bukeddetv", url: "https://www.bukedde.co.ug", premium: false, locked: false, free: true },
+  { name: "BBC News", url: "https://live-hls-web-aje.getaj.net/AJE/01.m3u8", premium: true, locked: true, free: false },
+  { name: "DW News", url: "https://dwstream3-lh.akamaihd.net/i/dwstream3_live@124409/master.m3u8", premium: true, locked: true, free: false },
+  { name: "Red Bull TV", url: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_3360.m3u8", premium: true, locked: true, free: false }
 ];
+
 let currentTVIndex = 0;
-let numBuffer = '';
-let numTimeout;
-const tvPlayer = document.getElementById("tvPlayer");
 const tvSelect = document.getElementById("tvSelect");
-const numDisplay = document.getElementById('numDisplay');
+const tvPlayer = document.getElementById("tvPlayer");
 const guideOverlay = document.getElementById("guideOverlay");
 const guideImg = document.getElementById("guideImg");
 const guideText = document.getElementById("guideText");
+let numBuffer='', numTimeout;
 
-function loadTVChannels() {
+// --- FM Stations ---
+let fmStations = [
+  { name: "BBC Radio 1", url: "https://stream.live.vc.bbcmedia.co.uk/bbc_radio_one", free: true },
+  { name: "Radio France", url: "https://direct.fipradio.fr/live/fip-midfi.mp3", free: false },
+  { name: "Smooth Jazz Florida", url: "https://us2.internet-radio.com/proxy/smoothjazzflorida?mp=/stream", free: false },
+  { name: "NPR News", url: "https://npr-ice.streamguys1.com/live.mp3", free: false },
+  { name: "BBC Radio 2", url: "https://stream.live.vc.bbcmedia.co.uk/bbc_radio_two", free: false }
+];
+let fmIndex = 0;
+const fmSelect = document.getElementById("fmSelect");
+const fmPlayer = document.getElementById("fmPlayer");
+
+// --- Load TV & FM ---
+function loadTVChannels(){
   tvSelect.innerHTML = "";
-  tvChannels.forEach(c => tvSelect.add(new Option(c.name,c.url)));
+  const subActive = !!localStorage.getItem("subExpiry");
+  tvChannels.forEach(c=>{ if(subActive || c.free) tvSelect.add(new Option(c.name,c.url)); });
 }
-tvSelect.addEventListener("change", playTV);
-document.getElementById("tvSearch").addEventListener("input", () => {
+
+function loadFMStations(){
+  fmSelect.innerHTML = "";
+  const subActive = !!localStorage.getItem("subExpiry");
+  fmStations.forEach(c=>{ if(subActive || c.free) fmSelect.add(new Option(c.name,c.url)); });
+}
+
+// --- Search ---
+document.getElementById("tvSearch").addEventListener("input",()=>{
   const q = document.getElementById("tvSearch").value.toLowerCase();
-  tvSelect.innerHTML = "";
-  tvChannels.filter(c => c.name.toLowerCase().includes(q))
-    .forEach(c => tvSelect.add(new Option(c.name,c.url)));
+  tvSelect.innerHTML="";
+  const subActive = !!localStorage.getItem("subExpiry");
+  tvChannels.filter(c=>c.name.toLowerCase().includes(q) && (subActive||c.free))
+            .forEach(c=>tvSelect.add(new Option(c.name,c.url)));
+});
+
+document.getElementById("fmSearch").addEventListener("input",()=>{
+  const q = document.getElementById("fmSearch").value.toLowerCase();
+  fmSelect.innerHTML="";
+  const subActive = !!localStorage.getItem("subExpiry");
+  fmStations.filter(c=>c.name.toLowerCase().includes(q) && (subActive||c.free))
+            .forEach(c=>fmSelect.add(new Option(c.name,c.url)));
 });
 
 // --- Guide ---
@@ -156,26 +193,24 @@ const guideSlides = [
   {img:"https://picsum.photos/800/400?random=5", text:"Enjoy movies, music, TV & FM in one hub."}
 ];
 let guideIndex=0, guideTimer;
-function startGuide(){
-  stopGuide();
-  guideOverlay.style.display="flex";
-  showGuideSlide();
-}
-function showGuideSlide(){
-  const slide = guideSlides[guideIndex];
-  guideImg.src = slide.img;
-  guideText.innerText = slide.text;
-  guideIndex = (guideIndex+1)%guideSlides.length;
-  guideTimer = setTimeout(showGuideSlide,4000);
-}
+function startGuide(){ stopGuide(); guideOverlay.style.display="flex"; showGuideSlide(); }
+function showGuideSlide(){ const slide=guideSlides[guideIndex]; guideImg.src=slide.img; guideText.innerText=slide.text; guideIndex=(guideIndex+1)%guideSlides.length; guideTimer=setTimeout(showGuideSlide,4000); }
 function stopGuide(){ clearTimeout(guideTimer); guideOverlay.style.display="none"; }
 function switchToGuide(){ tvSelect.value="guide"; playTV(); }
 
 // --- TV Controls ---
 function playTV(){
-  const url = tvSelect.value;
-  if(url==="guide"){ startGuide(); tvPlayer.pause(); }
-  else{ stopGuide(); tvPlayer.src=url; tvPlayer.play(); }
+  const idx = tvSelect.selectedIndex;
+  const channel = tvChannels[idx];
+  const subActive = !!localStorage.getItem("subExpiry");
+
+  if(!subActive && !channel.free){
+    alert("⚠️ Premium channel. Subscribe to unlock all TV channels.");
+    return;
+  }
+
+  if(channel.url==="guide"){ startGuide(); tvPlayer.pause(); } 
+  else{ stopGuide(); tvPlayer.src=channel.url; tvPlayer.play(); }
 }
 function pauseTV(){ tvPlayer.pause(); }
 function stopTV(){ tvPlayer.pause(); tvPlayer.currentTime=0; }
@@ -183,95 +218,96 @@ function toggleMuteTV(){ tvPlayer.muted=!tvPlayer.muted; }
 function nextTV(){ currentTVIndex=(currentTVIndex+1)%tvChannels.length; tvSelect.value=tvChannels[currentTVIndex].url; playTV(); }
 function prevTV(){ currentTVIndex=(currentTVIndex-1+tvChannels.length)%tvChannels.length; tvSelect.value=tvChannels[currentTVIndex].url; playTV(); }
 function infoTV(){ alert("Channel Info: "+tvChannels[currentTVIndex].name); }
-function pressNumber(n){
-  // show buffer on-screen
-  numBuffer += String(n);
-  showNumBuffer();
-  clearTimeout(numTimeout);
-  numTimeout = setTimeout(()=>{numBuffer=''; hideNumBuffer();}, 4000);
-}
-function showNumBuffer(){
-  numDisplay.style.display='block';
-  numDisplay.innerText = numBuffer;
-}
-function hideNumBuffer(){
-  numDisplay.style.display='none';
-  numDisplay.innerText = '';
-}
-function clearNum(){ numBuffer=''; hideNumBuffer(); }
-function goToChannel(){
-  if(!numBuffer) return;
-  const idx = parseInt(numBuffer,10) - 1;
-  if(!isNaN(idx) && idx >= 0 && idx < tvChannels.length){
-    tvIndex = idx;
-    tvSelect.value = tvChannels[tvIndex].url;
-    playTV();
-  } else {
-    alert('Channel number out of range');
+function pressNumber(n){ numBuffer+=String(n); clearTimeout(numTimeout); numTimeout=setTimeout(()=>{numBuffer='';},4000);}
+function clearNum(){ numBuffer=''; }
+function goToChannel(){ const idx=parseInt(numBuffer,10)-1; if(!isNaN(idx) && idx>=0 && idx<tvChannels.length){ currentTVIndex=idx; tvSelect.value=tvChannels[currentTVIndex].url; playTV(); } else{ alert('Channel number out of range'); } numBuffer=''; }
+
+// --- FM Controls ---
+function playFM(){
+  const idx = fmSelect.selectedIndex;
+  const station = fmStations[idx];
+  const subActive = !!localStorage.getItem("subExpiry");
+
+  if(!subActive && !station.free){
+    alert("⚠️ Premium FM station. Subscribe to unlock all FM channels.");
+    return;
   }
-  numBuffer=''; hideNumBuffer();
+
+  fmPlayer.src = station.url;
+  fmPlayer.play();
 }
-// --- FM Stations ---
-const fmStations = [
-  {name:"BBC Radio 1",url:"https://stream.live.vc.bbcmedia.co.uk/bbc_radio_one"},
-  {name:"Radio France",url:"https://direct.fipradio.fr/live/fip-midfi.mp3"},
-  {name:"Smooth Jazz Florida",url:"https://us2.internet-radio.com/proxy/smoothjazzflorida?mp=/stream"},
-  {name:"NPR News",url:"https://npr-ice.streamguys1.com/live.mp3"},
-  {name:"bbc radio",url:"https://stream.live.vc.bbcmedia.co.uk/bbc_radio_two"}
-];
-let fmIndex = 0;
-const fmSelect = document.getElementById("fmSelect");
-const fmPlayer = document.getElementById("fmPlayer");
-function loadFMStations(){
-  fmSelect.innerHTML = "";
-  fmStations.forEach(s=>fmSelect.add(new Option(s.name,s.url)));
-}
-fmSelect.addEventListener("change", playFM);
-document.getElementById("fmSearch").addEventListener("input", () => {
-  const q = document.getElementById("fmSearch").value.toLowerCase();
-  fmSelect.innerHTML = "";
-  fmStations.filter(s => s.name.toLowerCase().includes(q))
-    .forEach(s => fmSelect.add(new Option(s.name,s.url)));
-});
-function playFM(){ fmPlayer.src=fmSelect.value; fmPlayer.play(); }
 function pauseFM(){ fmPlayer.pause(); }
 function stopFM(){ fmPlayer.pause(); fmPlayer.currentTime=0; }
 function toggleMuteFM(){ fmPlayer.muted=!fmPlayer.muted; }
 function nextFM(){ fmIndex=(fmIndex+1)%fmStations.length; fmSelect.value=fmStations[fmIndex].url; playFM(); }
 function prevFM(){ fmIndex=(fmIndex-1+fmStations.length)%fmStations.length; fmSelect.value=fmStations[fmIndex].url; playFM(); }
 
-// --- Audio/Video Upload ---
+// --- Audio / Video Upload ---
 let audioTracks=[], videoClips=[];
-const audioPlayer = document.getElementById("audioPlayer");
-const videoPlayer = document.getElementById("videoPlayer");
-
-document.getElementById("audioUpload").addEventListener("change", uploadAudio);
-document.getElementById("videoUpload").addEventListener("change", uploadVideo);
-
-function uploadAudio(){
-  const file=document.getElementById("audioUpload").files[0];
-  if(file){ const url=URL.createObjectURL(file); audioTracks.push({name:file.name,url}); refreshAudio(); }
-}
-function uploadVideo(){
-  const file=document.getElementById("videoUpload").files[0];
-  if(file){ const url=URL.createObjectURL(file); videoClips.push({name:file.name,url}); refreshVideo(); }
-}
+const audioPlayer=document.getElementById("audioPlayer");
+const videoPlayer=document.getElementById("videoPlayer");
+document.getElementById("audioUpload").addEventListener("change",uploadAudio);
+document.getElementById("videoUpload").addEventListener("change",uploadVideo);
+function uploadAudio(){ const file=document.getElementById("audioUpload").files[0]; if(file){ const url=URL.createObjectURL(file); audioTracks.push({name:file.name,url}); refreshAudio(); } }
+function uploadVideo(){ const file=document.getElementById("videoUpload").files[0]; if(file){ const url=URL.createObjectURL(file); videoClips.push({name:file.name,url}); refreshVideo(); } }
 function refreshAudio(){ const sel=document.getElementById("audioSelect"); sel.innerHTML=""; audioTracks.forEach(a=>sel.add(new Option(a.name,a.url))); }
 function refreshVideo(){ const sel=document.getElementById("videoSelect"); sel.innerHTML=""; videoClips.forEach(v=>sel.add(new Option(v.name,v.url))); }
-
-document.getElementById("audioSelect").addEventListener("change", ()=>{ audioPlayer.src=document.getElementById("audioSelect").value; audioPlayer.play(); });
-document.getElementById("videoSelect").addEventListener("change", ()=>{ videoPlayer.src=document.getElementById("videoSelect").value; videoPlayer.play(); });
-
+document.getElementById("audioSelect").addEventListener("change",()=>{ audioPlayer.src=document.getElementById("audioSelect").value; audioPlayer.play(); });
+document.getElementById("videoSelect").addEventListener("change",()=>{ videoPlayer.src=document.getElementById("videoSelect").value; videoPlayer.play(); });
 function downloadAudio(){ const url=document.getElementById("audioSelect").value; if(url) window.open(url,"_blank"); }
 function downloadVideo(){ const url=document.getElementById("videoSelect").value; if(url) window.open(url,"_blank"); }
 
-// --- Subscription ---
-function subscribe(plan){ document.getElementById("subStatus").innerText="Status: Subscribed ("+plan+")"; }
+// --- Subscription / FasterPay ---
+function subscribe(plan){
+    const phone = document.getElementById("subscriberPhone").value.trim();
+    if(!phone){ alert("Enter your phone number first!"); return; }
 
-// --- Init ---
+    let amount = PLAN_PRICES[plan] || 0;
+    document.getElementById("amountPaid").value = amount;
+
+    const checkoutUrl = `https://fasterpay.com/checkout?merchant=YOUR_FASTERPAY_MERCHANT_KEY&amount=${amount}&phone=${phone}&plan=${plan}`;
+    window.open(checkoutUrl, "_blank");
+    alert("✅ Complete payment via FasterPay. Premium channels will unlock automatically after verification.");
+}
+
+async function checkSubscriptionAndUnlock(){
+    const phone = document.getElementById("subscriberPhone").value.trim();
+    if(!phone) return;
+
+    try{
+        const res = await fetch(`/check-subscription/${phone}`);
+        const data = await res.json();
+
+        if(data.subscribed){
+            localStorage.setItem("subExpiry", data.expiry);
+            document.getElementById("subStatus").innerText =
+                `Status: Subscribed — expires in approx
+                ${Math.round((data.expiry - Date.now())/3600000)} hr(s)`;
+            // Unlock all premium TV channels
+            tvChannels.forEach(ch => { if(ch.premium) ch.locked = false; });
+            // Reload dropdowns to show all channels
+            loadTVChannels();
+            loadFMStations();
+        } else {
+            localStorage.removeItem("subExpiry");
+            document.getElementById("subStatus").innerText = "Status: Free Mode";
+            // Lock premium channels again
+            tvChannels.forEach(ch => { if(ch.premium) ch.locked = true; });
+            loadTVChannels();
+            loadFMStations();
+        }
+    } catch(err){
+        console.error("Error checking subscription:", err);
+    }
+}
+
+// --- Periodically check subscription every minute ---
+setInterval(checkSubscriptionAndUnlock, 60000);
+checkSubscriptionAndUnlock();
+
+// --- Initialize dropdowns ---
 loadTVChannels();
 loadFMStations();
 </script>
-
 </body>
 </html>
