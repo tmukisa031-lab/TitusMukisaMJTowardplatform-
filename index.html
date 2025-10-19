@@ -1,51 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
 <title>Universal Media Hub</title>
-<meta property="og:title" content="Universal Media Hub" />
-<meta property="og:description" content="Watch, listen, and stream globally!" />
-<meta property="og:image" content="https://yourdomain.com/banner.jpg" />
-<meta property="og:url" content="https://yourdomain.com" />
-<meta name="twitter:card" content="summary_large_image" />
-<link rel="manifest" href="/manifest.json" />
-<link rel="icon" type="image/png" href="/logo.png" />
-<link rel="icon" href="/favicon.ico" />
 <style>
-  body { font-family: Arial, sans-serif; background:#111; color:#eee; margin:0; padding:0; text-align:center; }
-  h1,h2 { color:#0ff; margin:10px 0; }
-  .section { margin:20px auto; padding:15px; background:#222; border-radius:12px; width:90%; max-width:1000px; box-shadow:0 0 15px rgba(0,0,0,0.5); }
-  input, select { width:95%; margin:8px 0; padding:8px; border-radius:8px; border:none; background:#333; color:#0ff; }
-  button { margin:3px; padding:8px 12px; border:none; border-radius:8px; background:#333; color:#0ff; cursor:pointer; font-size:14px; }
-  button:hover { background:#0ff; color:#000; }
-  video, audio { width:100%; max-height:1100px; margin-top:15px; border-radius:8px; background:#000; }
-  .remote { display:flex; flex-wrap:wrap; justify-content:center; margin-top:10px; gap:6px; }
-  .remote button { flex: 1 0 60px; }
-  #guideOverlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:none; flex-direction:column; justify-content:center; align-items:center; color:#0ff; font-size:20px; font-weight:bold; text-shadow:2px 2px 4px #000; }
-  #guideOverlay img { max-width:90%; max-height:70%; margin-bottom:10px; border-radius:12px; box-shadow:0 0 20px rgba(0,0,0,0.8); }
-  num-display{position:absolute;bottom:12px;left:12px;background:rgba(0,0,0,0.7);padding:6px 10px;border-radius:8px;font-size:18px;color:var(--accent)}
-  .tv-frame{ width:100%; max-width:900px; height1110px; background:#111; border:15px solid #333; border-radius:15px; box-shadow:0 0 40px rgba(0,0,0,0.8); overflow:hidden; position:relative; margin:0 auto; }
-  select { max-height:200px; overflow-y:auto; }
+body { font-family: Arial, sans-serif; background:#111; color:#eee; text-align:center; margin:0; padding:0; }
+h1,h2 { color:#0ff; margin:10px 0; }
+.section { margin:20px auto; padding:15px; background:#222; border-radius:12px; width:90%; max-width:1000px; box-shadow:0 0 15px rgba(0,0,0,0.5); position:relative; }
+input, select { width:95%; margin:8px 0; padding:8px; border-radius:8px; border:none; }
+video, audio { width:100%; margin-top:15px; border-radius:8px; background:#000; max-height:1100px; }
+.remote { display:flex; flex-wrap:wrap; justify-content:center; margin-top:10px; gap:6px; }
+.remote button { padding:10px 14px; border:none; border-radius:8px; background:#333; color:#0ff; cursor:pointer; font-size:14px; }
+.remote button:hover { background:#0ff; color:#000; }
+#guideOverlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; flex-direction:column; justify-content:center; align-items:center; color:#0ff; font-size:20px; font-weight:bold; text-shadow:2px 2px 4px #000; }
+#guideOverlay img { max-width:90%; max-height:70%; margin-bottom:10px; border-radius:12px; box-shadow:0 0 20px rgba(0,0,0,0.8); }
+#guideOverlay button { margin-top:12px; padding:8px 16px; border:none; border-radius:8px; background:#0ff; color:#000; cursor:pointer; }
+.tv-frame { width:100%; max-width:900px; height:150px; background:#111; border:15px solid #333; border-radius:15px; box-shadow:0 0 40px rgba(0,0,0,0.8); overflow:hidden; position:relative; margin:0 auto; }
 </style>
 </head>
 <body>
-
 <h1>🌍 Universal Media Hub</h1>
-
-<!-- TV Section -->
+<!-- TV / IPTV Section -->
 <div class="section">
   <h2>📺 TV / IPTV</h2>
-  <input type="text" id="tvSearch" placeholder="Search TV channel...">
-  <select id="tvSelect"></select>
-  <div class="tv-frame",>
+  <input type="text" id="tvSearch" placeholder="Search TV channel..." onkeyup="searchTV()">
+  <select id="tvSelect" size="6" onchange="playTV()"></select>
+  <div class="tv-frame">
     <video id="tvPlayer" controls></video>
-    <div id="guideOverlay">
+    <div id="guideOverlay" style="display:none;">
       <img id="guideImg" src="" alt="Guide Slide">
       <div id="guideText"></div>
+      <button onclick="stopGuide()">Close Guide</button>
     </div>
   </div>
-  <div style="margin-top:10px" class="remote" >
+  <div class="remote">
     <button onclick="prevTV()">⏮ Prev</button>
     <button onclick="playTV()">▶️ Play</button>
     <button onclick="pauseTV()">⏸ Pause</button>
@@ -53,31 +41,26 @@
     <button onclick="toggleMuteTV()">🔇 Mute</button>
     <button onclick="nextTV()">⏭ Next</button>
     <button onclick="switchToGuide()">📺 Guide</button>
+    <!-- Numeric keypad -->
+    <button onclick="pressNumber(1)">1</button>
+    <button onclick="pressNumber(2)">2</button>
+    <button onclick="pressNumber(3)">3</button>
+    <button onclick="pressNumber(4)">4</button>
+    <button onclick="pressNumber(5)">5</button>
+    <button onclick="pressNumber(6)">6</button>
+    <button onclick="pressNumber(7)">7</button>
+    <button onclick="pressNumber(8)">8</button>
+    <button onclick="pressNumber(9)">9</button>
+    <button onclick="pressNumber(0)">0</button>
+    <button onclick="goToChannel()">Enter</button>
     <button onclick="infoTV()">ℹ️ Info</button>
-        <!-- numeric keypad (press shows digits) -->
-        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:420px">
-          <button class="btn" onclick="pressNumber(1)">1</button>
-          <button class="btn" onclick="pressNumber(2)">2</button>
-          <button class="btn" onclick="pressNumber(3)">3</button>
-          <button class="btn" onclick="pressNumber(4)">4</button>
-          <button class="btn" onclick="pressNumber(5)">5</button>
-          <button class="btn" onclick="pressNumber(6)">6</button>
-          <button class="btn" onclick="pressNumber(7)">7</button>
-          <button class="btn" onclick="pressNumber(8)">8</button>
-          <button class="btn" onclick="pressNumber(9)">9</button>
-          <button class="btn" onclick="pressNumber(0)">0</button>
-          <button class="btn" onclick="clearNum()">Clear</button>
-          <button class="btn" onclick="goToChannel()">Enter</button>
-        </div>
-      
   </div>
 </div>
-
 <!-- FM Section -->
 <div class="section">
   <h2>📻 FM Radio</h2>
-  <input type="text" id="fmSearch" placeholder="Search FM station...">
-  <select id="fmSelect"></select>
+  <input type="text" id="fmSearch" placeholder="Search FM station..." onkeyup="searchFM()">
+  <select id="fmSelect" size="6" onchange="playFM()"></select>
   <audio id="fmPlayer" controls></audio>
   <div class="remote">
     <button onclick="prevFM()">⏮ Prev</button>
@@ -86,31 +69,26 @@
     <button onclick="stopFM()">⏹ Stop</button>
     <button onclick="toggleMuteFM()">🔇 Mute</button>
     <button onclick="nextFM()">⏭ Next</button>
-
   </div>
 </div>
-
 <!-- Audio Section -->
 <div class="section">
   <h2>🎶 Audio / Music</h2>
-  <input type="text" id="audioSearch" placeholder="Search audio...">
-  <input type="file" id="audioUpload" accept="audio/*">
-  <select id="audioSelect" size="6"></select>
+  <input type="text" id="audioSearch" placeholder="Search audio..." onkeyup="searchAudio()">
+  <input type="file" id="audioUpload" accept="audio/*" onchange="uploadAudio()">
+  <select id="audioSelect" size="6" onchange="playAudio()"></select>
   <audio id="audioPlayer" controls></audio>
   <button onclick="downloadAudio()">⬇ Download Selected</button>
 </div>
-
 <!-- Video Section -->
 <div class="section">
   <h2>🎥 Video / Movies</h2>
-  <input type="text" id="videoSearch" placeholder="Search video...">
-  <input type="file" id="videoUpload" accept="video/*">
-  <select id="videoSelect" size="6"></select>
+  <input type="text" id="videoSearch" placeholder="Search video..." onkeyup="searchVideo()">
+  <input type="file" id="videoUpload" accept="video/*" onchange="uploadVideo()">
+  <select id="videoSelect" size="6" onchange="playVideo()"></select>
   <video id="videoPlayer" controls></video>
   <button onclick="downloadVideo()">⬇ Download Selected</button>
-
 </div>
-
 <!-- Subscription Section -->
 <div class="section">
   <h2>💳 Subscription Access</h2>
@@ -121,165 +99,120 @@
   <button onclick="subscribe('unlimited')">♾ Unlimited</button>
   <p id="subStatus">Status: Free Mode</p>
 </div>
-
 <script>
-// --- TV Channels ---
-const tvChannels = [
-  { name: "Guide Channel", url: "guide" },
-  { name: "BBC News", url: "https://live-hls-web-aje.getaj.net/AJE/01.m3u8" },
-  { name: "DW News", url: "https://dwstream3-lh.akamaihd.net/i/dwstream3_live@124409/master.m3u8" },
-  { name: "Red Bull TV", url: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_3360.m3u8" },
-  { name: "MovieSphere", url: "https://moviesphere-samsungus.amagi.tv/playlist.m3u8" },
-  {name:"Bukeddetv",url:"www.bukedde.co.ug"},
-  {name:"dailymotion",url:"https://stream-02.sg1.dailymotion.com/sec(...)/master.m3u8"}
+// --- Media Lists ---
+let tvChannels=[
+  {name:"Guide Channel",url:"guide"},  
+  { name: "Local Free Channel", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
+  {name:"BBC News",url:"https://example.com/bbc.m3u8"},
+  {name:"CNN",url:"https://example.com/cnn.m3u8"},
+  {name:"Al Jazeera",url:"https://example.com/aljazeera.m3u8"},
+  {name:"Food Network",url:"https://example.com/foodnetwork.m3u8"},
+  {name:"Discovery Channel",url:"https://example.com/discovery.m3u8"},
+
 ];
-let currentTVIndex = 0;
-let numBuffer = '';
-let numTimeout;
-const tvPlayer = document.getElementById("tvPlayer");
-const tvSelect = document.getElementById("tvSelect");
-const numDisplay = document.getElementById('numDisplay');
-const guideOverlay = document.getElementById("guideOverlay");
-const guideImg = document.getElementById("guideImg");
-const guideText = document.getElementById("guideText");
+let fmStations=[
+  {name:"Capital FM 91.3",url:"http://stream.zeno.fm/ssn0z7z0qd0uv"},
+  {name:"CBS FM 88.8",url:"http://stream.zeno.fm/qnydx59r0ueuv"},
+  {name:"BBC World Service",url:"http://stream.zeno.fm/gy7x3a9t6f8uv"},{ name:"NPR News", url:"https://npr-ice.streamguys1.com/live.mp3"},
+  { name:"BBC Radio 1", url:"https://stream.live.vc.bbcmedia.co.uk/bbc_radio_one"},
+  { name:"BBC Radio 2", url:"https://stream.live.vc.bbcmedia.co.uk/bbc_radio_two"},
+  { name:"BBC World Service", url:"https://stream.live.vc.bbcmedia.co.uk/bbc_world_service"},
+  { name:"Radio France FIP", url:"https://direct.fipradio.fr/live/fip-midfi.mp3"},
 
-function loadTVChannels() {
-  tvSelect.innerHTML = "";
-  tvChannels.forEach(c => tvSelect.add(new Option(c.name,c.url)));
+
+
+];
+let audioTracks=[], videoClips=[];
+// --- Load Lists ---
+function loadLists(){
+  const tvSel=document.getElementById("tvSelect"); tvSel.innerHTML="";
+  tvChannels.forEach(c=>tvSel.add(new Option(c.name,c.url)));
+  const fmSel=document.getElementById("fmSelect"); fmSel.innerHTML="";
+  fmStations.forEach(s=>fmSel.add(new Option(s.name,s.url)));
+  refreshAudio(); refreshVideo();
 }
-tvSelect.addEventListener("change", playTV);
-document.getElementById("tvSearch").addEventListener("input", () => {
-  const q = document.getElementById("tvSearch").value.toLowerCase();
-  tvSelect.innerHTML = "";
-  tvChannels.filter(c => c.name.toLowerCase().includes(q))
-    .forEach(c => tvSelect.add(new Option(c.name,c.url)));
-});
-
-// --- Guide ---
-const guideSlides = [
+// --- Search ---
+function searchTV(){ let q=document.getElementById("tvSearch").value.toLowerCase(); let sel=document.getElementById("tvSelect"); sel.innerHTML=""; tvChannels.filter(c=>c.name.toLowerCase().includes(q)).forEach(c=>sel.add(new Option(c.name,c.url))); }
+function searchFM(){ let q=document.getElementById("fmSearch").value.toLowerCase(); let sel=document.getElementById("fmSelect"); sel.innerHTML=""; fmStations.filter(s=>s.name.toLowerCase().includes(q)).forEach(s=>sel.add(new Option(s.name,s.url))); }
+function searchAudio(){ let q=document.getElementById("audioSearch").value.toLowerCase(); let sel=document.getElementById("audioSelect"); sel.innerHTML=""; audioTracks.filter(a=>a.name.toLowerCase().includes(q)).forEach(a=>sel.add(new Option(a.name,a.url))); }
+function searchVideo(){ let q=document.getElementById("videoSearch").value.toLowerCase(); let sel=document.getElementById("videoSelect"); sel.innerHTML=""; videoClips.filter(v=>v.name.toLowerCase().includes(q)).forEach(v=>sel.add(new Option(v.name,v.url))); }
+// --- TV Controls ---
+let tvIndex=0, tvPlayer=document.getElementById("tvPlayer");
+let numBuffer="", subscribed=false;
+function playTV(){
+  let sel=document.getElementById("tvSelect");
+  let url=sel.value;
+  tvIndex=sel.selectedIndex;
+  if(!subscribed && tvIndex>0){ 
+    alert("Please subscribe to access this channel."); 
+    return;
+  }
+  if(url==="guide"){ startGuide(); } else { stopGuide(); tvPlayer.src=url; tvPlayer.play(); }
+}
+function pauseTV(){ tvPlayer.pause(); }
+function stopTV(){ tvPlayer.pause(); tvPlayer.currentTime=0; }
+function toggleMuteTV(){ tvPlayer.muted=!tvPlayer.muted; }
+function nextTV(){ tvIndex=(tvIndex+1)%tvChannels.length; document.getElementById("tvSelect").selectedIndex=tvIndex; playTV(); }
+function prevTV(){ tvIndex=(tvIndex-1+tvChannels.length)%tvChannels.length; document.getElementById("tvSelect").selectedIndex=tvIndex; playTV(); }
+function pressNumber(n){ numBuffer+=n; }
+function goToChannel(){ let idx=parseInt(numBuffer)-1; if(idx>=0 && idx<tvChannels.length){ tvIndex=idx; document.getElementById("tvSelect").selectedIndex=idx; playTV(); } numBuffer=""; }
+function infoTV(){ alert("Channel Info: "+tvChannels[tvIndex].name); }
+// --- Guide Channel with Images ---
+let guideSlides=[
   {img:"https://picsum.photos/800/400?random=1", text:"Welcome to the Guide Channel!"},
-  {img:"https://picsum.photos/800/400?random=2", text:"Use the Remote to control your media."},
-  {img:"https://picsum.photos/800/400?random=3", text:"Upload and download audio & video."},
+  {img:"https://picsum.photos/800/400?random=2", text:"Use the Remote to control your media easily."},
+  {img:"https://picsum.photos/800/400?random=3", text:"Upload and download your own audio & video."},
   {img:"https://picsum.photos/800/400?random=4", text:"Subscribe for premium channels."},
   {img:"https://picsum.photos/800/400?random=5", text:"Enjoy movies, music, TV & FM in one hub."}
 ];
 let guideIndex=0, guideTimer;
 function startGuide(){
   stopGuide();
-  guideOverlay.style.display="flex";
+  document.getElementById("guideOverlay").style.display="flex";
   showGuideSlide();
 }
 function showGuideSlide(){
-  const slide = guideSlides[guideIndex];
-  guideImg.src = slide.img;
-  guideText.innerText = slide.text;
-  guideIndex = (guideIndex+1)%guideSlides.length;
-  guideTimer = setTimeout(showGuideSlide,4000);
+  let slide=guideSlides[guideIndex];
+  document.getElementById("guideImg").src=slide.img;
+  document.getElementById("guideText").innerText=slide.text;
+  guideIndex=(guideIndex+1)%guideSlides.length;
+  guideTimer=setTimeout(showGuideSlide,4000);
 }
-function stopGuide(){ clearTimeout(guideTimer); guideOverlay.style.display="none"; }
-function switchToGuide(){ tvSelect.value="guide"; playTV(); }
-
-// --- TV Controls ---
-function playTV(){
-  const url = tvSelect.value;
-  if(url==="guide"){ startGuide(); tvPlayer.pause(); }
-  else{ stopGuide(); tvPlayer.src=url; tvPlayer.play(); }
+function stopGuide(){
+  clearTimeout(guideTimer);
+  document.getElementById("guideOverlay").style.display="none";
 }
-function pauseTV(){ tvPlayer.pause(); }
-function stopTV(){ tvPlayer.pause(); tvPlayer.currentTime=0; }
-function toggleMuteTV(){ tvPlayer.muted=!tvPlayer.muted; }
-function nextTV(){ currentTVIndex=(currentTVIndex+1)%tvChannels.length; tvSelect.value=tvChannels[currentTVIndex].url; playTV(); }
-function prevTV(){ currentTVIndex=(currentTVIndex-1+tvChannels.length)%tvChannels.length; tvSelect.value=tvChannels[currentTVIndex].url; playTV(); }
-function infoTV(){ alert("Channel Info: "+tvChannels[currentTVIndex].name); }
-function pressNumber(n){
-  // show buffer on-screen
-  numBuffer += String(n);
-  showNumBuffer();
-  clearTimeout(numTimeout);
-  numTimeout = setTimeout(()=>{numBuffer=''; hideNumBuffer();}, 4000);
-}
-function showNumBuffer(){
-  numDisplay.style.display='block';
-  numDisplay.innerText = numBuffer;
-}
-function hideNumBuffer(){
-  numDisplay.style.display='none';
-  numDisplay.innerText = '';
-}
-function clearNum(){ numBuffer=''; hideNumBuffer(); }
-function goToChannel(){
-  if(!numBuffer) return;
-  const idx = parseInt(numBuffer,10) - 1;
-  if(!isNaN(idx) && idx >= 0 && idx < tvChannels.length){
-    tvIndex = idx;
-    tvSelect.value = tvChannels[tvIndex].url;
-    playTV();
-  } else {
-    alert('Channel number out of range');
-  }
-  numBuffer=''; hideNumBuffer();
-}
-// --- FM Stations ---
-const fmStations = [
-  {name:"BBC Radio 1",url:"https://stream.live.vc.bbcmedia.co.uk/bbc_radio_one"},
-  {name:"Radio France",url:"https://direct.fipradio.fr/live/fip-midfi.mp3"},
-  {name:"Smooth Jazz Florida",url:"https://us2.internet-radio.com/proxy/smoothjazzflorida?mp=/stream"},
-  {name:"NPR News",url:"https://npr-ice.streamguys1.com/live.mp3"},
-  {name:"bbc radio",url:"https://stream.live.vc.bbcmedia.co.uk/bbc_radio_two"}
-];
-let fmIndex = 0;
-const fmSelect = document.getElementById("fmSelect");
-const fmPlayer = document.getElementById("fmPlayer");
-function loadFMStations(){
-  fmSelect.innerHTML = "";
-  fmStations.forEach(s=>fmSelect.add(new Option(s.name,s.url)));
-}
-fmSelect.addEventListener("change", playFM);
-document.getElementById("fmSearch").addEventListener("input", () => {
-  const q = document.getElementById("fmSearch").value.toLowerCase();
-  fmSelect.innerHTML = "";
-  fmStations.filter(s => s.name.toLowerCase().includes(q))
-    .forEach(s => fmSelect.add(new Option(s.name,s.url)));
-});
-function playFM(){ fmPlayer.src=fmSelect.value; fmPlayer.play(); }
+function switchToGuide(){ document.getElementById("tvSelect").selectedIndex=0; playTV(); }
+// --- FM Controls ---
+let fmIndex=0, fmPlayer=document.getElementById("fmPlayer");
+function playFM(){ let sel=document.getElementById("fmSelect");
+  let url=sel.value;
+  fmIndex=sel.selectedIndex;
+  if(!subscribed && fmIndex>0){ 
+    alert("Please subscribe to access this channel."); 
+    return;
+  }fmPlayer.src=document.getElementById("fmSelect").value; fmPlayer.play(); }
 function pauseFM(){ fmPlayer.pause(); }
 function stopFM(){ fmPlayer.pause(); fmPlayer.currentTime=0; }
 function toggleMuteFM(){ fmPlayer.muted=!fmPlayer.muted; }
-function nextFM(){ fmIndex=(fmIndex+1)%fmStations.length; fmSelect.value=fmStations[fmIndex].url; playFM(); }
-function prevFM(){ fmIndex=(fmIndex-1+fmStations.length)%fmStations.length; fmSelect.value=fmStations[fmIndex].url; playFM(); }
-
-// --- Audio/Video Upload ---
-let audioTracks=[], videoClips=[];
-const audioPlayer = document.getElementById("audioPlayer");
-const videoPlayer = document.getElementById("videoPlayer");
-
-document.getElementById("audioUpload").addEventListener("change", uploadAudio);
-document.getElementById("videoUpload").addEventListener("change", uploadVideo);
-
-function uploadAudio(){
-  const file=document.getElementById("audioUpload").files[0];
-  if(file){ const url=URL.createObjectURL(file); audioTracks.push({name:file.name,url}); refreshAudio(); }
-}
-function uploadVideo(){
-  const file=document.getElementById("videoUpload").files[0];
-  if(file){ const url=URL.createObjectURL(file); videoClips.push({name:file.name,url}); refreshVideo(); }
-}
-function refreshAudio(){ const sel=document.getElementById("audioSelect"); sel.innerHTML=""; audioTracks.forEach(a=>sel.add(new Option(a.name,a.url))); }
-function refreshVideo(){ const sel=document.getElementById("videoSelect"); sel.innerHTML=""; videoClips.forEach(v=>sel.add(new Option(v.name,v.url))); }
-
-document.getElementById("audioSelect").addEventListener("change", ()=>{ audioPlayer.src=document.getElementById("audioSelect").value; audioPlayer.play(); });
-document.getElementById("videoSelect").addEventListener("change", ()=>{ videoPlayer.src=document.getElementById("videoSelect").value; videoPlayer.play(); });
-
-function downloadAudio(){ const url=document.getElementById("audioSelect").value; if(url) window.open(url,"_blank"); }
-function downloadVideo(){ const url=document.getElementById("videoSelect").value; if(url) window.open(url,"_blank"); }
-
+function nextFM(){ fmIndex=(fmIndex+1)%fmStations.length; document.getElementById("fmSelect").selectedIndex=fmIndex; playFM(); }
+function prevFM(){ fmIndex=(fmIndex-1+fmStations.length)%fmStations.length; document.getElementById("fmSelect").selectedIndex=fmIndex; playFM(); }
+// --- Audio/Video Upload & Play ---
+const audioPlayer=document.getElementById("audioPlayer");
+const videoPlayer=document.getElementById("videoPlayer");
+function uploadAudio(){ const file=document.getElementById("audioUpload").files[0]; if(file){ const url=URL.createObjectURL(file); audioTracks.push({name:file.name,url}); refreshAudio(); } }
+function uploadVideo(){ const file=document.getElementById("videoUpload").files[0]; if(file){ const url=URL.createObjectURL(file); videoClips.push({name:file.name,url}); refreshVideo(); } }
+function refreshAudio(){ let sel=document.getElementById("audioSelect"); sel.innerHTML=""; audioTracks.forEach(a=>sel.add(new Option(a.name,a.url))); }
+function refreshVideo(){ let sel=document.getElementById("videoSelect"); sel.innerHTML=""; videoClips.forEach(v=>sel.add(new Option(v.name,v.url))); }
+function playAudio(){ audioPlayer.src=document.getElementById("audioSelect").value; audioPlayer.play(); }
+function playVideo(){ videoPlayer.src=document.getElementById("videoSelect").value; videoPlayer.play(); }
+function forceDownload(url,name){ const a=document.createElement("a"); a.href=url; a.download=name||"media"; a.click(); }
+function downloadAudio(){ let sel=document.getElementById("audioSelect"); if(sel.value) forceDownload(sel.value, sel.options[sel.selectedIndex].text); }
+function downloadVideo(){ let sel=document.getElementById("videoSelect"); if(sel.value) forceDownload(sel.value, sel.options[sel.selectedIndex].text); }
 // --- Subscription ---
-function subscribe(plan){ document.getElementById("subStatus").innerText="Status: Subscribed ("+plan+")"; }
-
-// --- Init ---
-loadTVChannels();
-loadFMStations();
+function subscribe(plan){ subscribed=true; document.getElementById("subStatus").innerText="Status: Subscribed ("+plan+")"; }
+window.onload=loadLists;
 </script>
-
 </body>
 </html>
