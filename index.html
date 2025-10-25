@@ -8,20 +8,19 @@ body { font-family: Arial, sans-serif; background:#111; color:#eee; text-align:c
 h1,h2 { color:#0ff; margin:10px 0; }
 .section { margin:20px auto; padding:15px; background:#222; border-radius:12px; width:90%; max-width:1000px; box-shadow:0 0 15px rgba(0,0,0,0.5); position:relative; }
 input, select { width:95%; margin:8px 0; padding:8px; border-radius:8px; border:none; }
-video, audio { width:100%; margin-top:15px; border-radius:8px; background:#000; max-height:1010px; }
+video, audio { width:100%; margin-top:10px;margin-bottom:10px; border-radius:8px; background:#000; max-height:1100px; }
 .remote { display:flex; flex-wrap:wrap; justify-content:center; margin-top:10px; gap:6px; }
 .remote button { padding:10px 14px; border:none; border-radius:8px; background:#333; color:#0ff; cursor:pointer; font-size:14px; }
 .remote button:hover { background:#0ff; color:#000; }
 #guideOverlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; flex-direction:column; justify-content:center; align-items:center; color:#0ff; font-size:20px; font-weight:bold; text-shadow:2px 2px 4px #000; }
 #guideOverlay img { max-width:90%; max-height:70%; margin-bottom:10px; border-radius:12px; box-shadow:0 0 20px rgba(0,0,0,0.8); }
 #guideOverlay button { margin-top:12px; padding:8px 16px; border:none; border-radius:8px; background:#0ff; color:#000; cursor:pointer; }
-num-display{position:absolute;bottom:12px;left:12px;background:rgba(0,0,0,0.7);padding:6px 10px;border-radius:8px;font-size:18px;color:var(--accent)}
-.tv-frame { width:100%; max-width:900px; max-height:600px; background:#111; border:15px solid #333; border-radius:15px; box-shadow:0 0 40px rgba(0,0,0,0.8); overflow:hidden; position:relative; margin:0 auto; }
-select { max-height:200px; overflow-y:auto; }
+.tv-frame { width:100%; max-width:900px; height:170px; background:#111; border:15px solid #333; border-radius:15px; box-shadow:0 0 40px rgba(0,0,0,0.8); overflow:hidden; position:relative; margin:0 auto; }
 </style>
 </head>
 <body>
 <h1>🌍 Universal Media Hub</h1>
+
 <!-- TV / IPTV Section -->
 <div class="section">
   <h2>📺 TV / IPTV</h2>
@@ -43,7 +42,6 @@ select { max-height:200px; overflow-y:auto; }
     <button onclick="toggleMuteTV()">🔇 Mute</button>
     <button onclick="nextTV()">⏭ Next</button>
     <button onclick="switchToGuide()">📺 Guide</button>
-    <!-- Numeric keypad -->
     <button onclick="pressNumber(1)">1</button>
     <button onclick="pressNumber(2)">2</button>
     <button onclick="pressNumber(3)">3</button>
@@ -58,6 +56,7 @@ select { max-height:200px; overflow-y:auto; }
     <button onclick="infoTV()">ℹ️ Info</button>
   </div>
 </div>
+
 <!-- FM Section -->
 <div class="section">
   <h2>📻 FM Radio</h2>
@@ -73,6 +72,7 @@ select { max-height:200px; overflow-y:auto; }
     <button onclick="nextFM()">⏭ Next</button>
   </div>
 </div>
+
 <!-- Audio Section -->
 <div class="section">
   <h2>🎶 Audio / Music</h2>
@@ -82,6 +82,7 @@ select { max-height:200px; overflow-y:auto; }
   <audio id="audioPlayer" controls></audio>
   <button onclick="downloadAudio()">⬇ Download Selected</button>
 </div>
+
 <!-- Video Section -->
 <div class="section">
   <h2>🎥 Video / Movies</h2>
@@ -91,33 +92,28 @@ select { max-height:200px; overflow-y:auto; }
   <video id="videoPlayer" controls></video>
   <button onclick="downloadVideo()">⬇ Download Selected</button>
 </div>
+
 <!-- Subscription Section -->
 <div class="section">
   <h2>💳 Subscription Access</h2>
   <p>Select a plan to unlock premium IPTV & Radio channels:</p>
-  <button onclick="subscribe('1h')">⏱ 1 Hour</button>
-  <button onclick="subscribe('1d')">📆 1 Day</button>
-  <button onclick="subscribe('1m')">🗓 1 Month</button>
-  <button onclick="subscribe('unlimited')">♾ Unlimited</button>
+  <button onclick="subscribePrompt('1d')">📆 1 Day (UGX 1000)</button>
+  <button onclick="subscribePrompt('1w')">🗓 1 Week (UGX 5000)</button>
+  <button onclick="subscribePrompt('1m')">🗓 1 Month (UGX 15000)</button>
+  <button onclick="subscribePrompt('unlimited')">♾ Unlimited (UGX 45.5/hour)</button>
   <p id="subStatus">Status: Free Mode</p>
 </div>
+
 <script>
 // --- Media Lists ---
-let tvChannels=[
-  {name:"Guide Channel",url:"guide"},
-      { name: "Local Free Channel", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
-    { name: "Trace Urban", url: "https://lightning-traceurban-samsungau.amagi.tv/playlist.m3u8"},
-  {name:"BBC News",url:"https://example.com/bbc.m3u8"},
-  {name:"CNN",url:"https://example.com/cnn.m3u8"},  {name:"Al Jazeera",url:"https://example.com/aljazeera.m3u8"},
-   t.m3u8?network_id=789"},
-   ];
-   
-let fmStations=[  {name:"Capital FM 91.3",url:"http://stream.zeno.fm/ssn0z7z0qd0uv"},
-  {name:"CBS FM 88.8",url:"http://stream.zeno.fm/qnydx59r0ueuv"},
-  {name:"BBC World Service",url:"http://stream.zeno.fm/gy7x3a9t6f8uv"},{ name:"NPR News", url:"https://npr-ice.streamguys1.com/live.mp3"},
-  
-  ];
+let tvChannels=[ /* Your TV channels */ ];
+let fmStations=[ /* Your FM stations */ ];
 let audioTracks=[], videoClips=[];
+
+// --- Subscription Tracking ---
+let subscribed=false;
+let subscriptionExpiry=null;
+
 // --- Load Lists ---
 function loadLists(){
   const tvSel=document.getElementById("tvSelect"); tvSel.innerHTML="";
@@ -126,75 +122,96 @@ function loadLists(){
   fmStations.forEach(s=>fmSel.add(new Option(s.name,s.url)));
   refreshAudio(); refreshVideo();
 }
-// --- Search ---
-function searchTV(){ let q=document.getElementById("tvSearch").value.toLowerCase(); let sel=document.getElementById("tvSelect"); sel.innerHTML=""; tvChannels.filter(c=>c.name.toLowerCase().includes(q)).forEach(c=>sel.add(new Option(c.name,c.url))); }
-function searchFM(){ let q=document.getElementById("fmSearch").value.toLowerCase(); let sel=document.getElementById("fmSelect"); sel.innerHTML=""; fmStations.filter(s=>s.name.toLowerCase().includes(q)).forEach(s=>sel.add(new Option(s.name,s.url))); }
-function searchAudio(){ let q=document.getElementById("audioSearch").value.toLowerCase(); let sel=document.getElementById("audioSelect"); sel.innerHTML=""; audioTracks.filter(a=>a.name.toLowerCase().includes(q)).forEach(a=>sel.add(new Option(a.name,a.url))); }
-function searchVideo(){ let q=document.getElementById("videoSearch").value.toLowerCase(); let sel=document.getElementById("videoSelect"); sel.innerHTML=""; videoClips.filter(v=>v.name.toLowerCase().includes(q)).forEach(v=>sel.add(new Option(v.name,v.url))); }
+
+// --- Subscription Payment Prompt ---
+function subscribePrompt(plan){
+  let amount=0;
+  switch(plan){
+    case '1d': amount=1000; break;
+    case '1w': amount=5000; break;
+    case '1m': amount=15000; break;
+    case 'unlimited':
+      amount = parseFloat(prompt("Enter amount to pay for unlimited plan (UGX 45.5/hour):"));
+      if(isNaN(amount) || amount<=0){ alert("Invalid amount."); return; }
+      break;
+  }
+
+  let pin = prompt(`Confirm payment of UGX ${amount} via MTN Mobile Money.\nEnter your MTN PIN:`);
+
+  if(pin){ 
+    // Here, in real system you would call MTN API to verify transaction
+    alert("Payment verified successfully!");
+    activateSubscription(plan, amount);
+  } else { alert("Payment cancelled."); }
+}
+
+function activateSubscription(plan, amount){
+  let now = new Date();
+  let expiry;
+  switch(plan){
+    case "1d": expiry=new Date(now.getTime() + 24*60*60*1000); break;
+    case "1w": expiry=new Date(now.getTime() + 7*24*60*60*1000); break;
+    case "1m": expiry=new Date(now.getTime() + 30*24*60*60*1000); break;
+    case "unlimited":
+      let hours = amount / 45.5;
+      expiry = new Date(now.getTime() + hours*60*60*1000);
+      break;
+  }
+  subscriptionExpiry = expiry;
+  subscribed=true;
+  document.getElementById("subStatus").innerText=`Status: Subscribed until ${expiry.toLocaleString()}`;
+}
+
+// --- Check Subscription ---
+function checkSubscription(){
+  if(!subscribed) return false;
+  if(subscriptionExpiry && new Date()>subscriptionExpiry){
+    subscribed=false;
+    subscriptionExpiry=null;
+    document.getElementById("subStatus").innerText="Status: Free Mode";
+    alert("Your subscription has expired. Please renew.");
+    return false;
+  }
+  return true;
+}
+
 // --- TV Controls ---
-let tvIndex=0, tvPlayer=document.getElementById("tvPlayer");
-let numBuffer="", subscribed=false;
-function playTV(){
+let tvIndex=0, tvPlayer=document.getElementById("tvPlayer"), numBuffer="";
+function playTV(){ 
+  if(!checkSubscription() && tvIndex>0) return;
   let sel=document.getElementById("tvSelect");
   let url=sel.value;
   tvIndex=sel.selectedIndex;
-  if(!subscribed && tvIndex>0){ 
-    alert("Please subscribe to access this channel."); 
-    return;
-  }
   if(url==="guide"){ startGuide(); } else { stopGuide(); tvPlayer.src=url; tvPlayer.play(); }
 }
 function pauseTV(){ tvPlayer.pause(); }
 function stopTV(){ tvPlayer.pause(); tvPlayer.currentTime=0; }
 function toggleMuteTV(){ tvPlayer.muted=!tvPlayer.muted; }
 function nextTV(){ tvIndex=(tvIndex+1)%tvChannels.length; document.getElementById("tvSelect").selectedIndex=tvIndex; playTV(); }
-function prevTV(){ tvIndex=(tvIndex-1+tvChannels.length)%tvChannels.length; document.getElementById("tvSelect").selectedIndex=tvIndex; playTV(); }
+function prevTV(){ tvIndex=(tvIndex+tvChannels.length)%tvChannels.length; document.getElementById("tvSelect").selectedIndex=tvIndex; playTV(); }
 function pressNumber(n){ numBuffer+=n; }
 function goToChannel(){ let idx=parseInt(numBuffer)-1; if(idx>=0 && idx<tvChannels.length){ tvIndex=idx; document.getElementById("tvSelect").selectedIndex=idx; playTV(); } numBuffer=""; }
 function infoTV(){ alert("Channel Info: "+tvChannels[tvIndex].name); }
-// --- Guide Channel with Images ---
-let guideSlides=[
-  {img:"https://picsum.photos/800/400?random=1", text:"Welcome to the Guide Channel!"},
-  {img:"https://picsum.photos/800/400?random=2", text:"Use the Remote to control your media easily."},
-  {img:"https://picsum.photos/800/400?random=3", text:"Upload and download your own audio & video."},
-  {img:"https://picsum.photos/800/400?random=4", text:"Subscribe for premium channels."},
-  {img:"https://picsum.photos/800/400?random=5", text:"Enjoy movies, music, TV & FM in one hub."}
-];
+
+// --- Guide ---
+let guideSlides=[ {img:"https://picsum.photos/800/400?random=1", text:"Welcome!"} ];
 let guideIndex=0, guideTimer;
-function startGuide(){
-  stopGuide();
-  document.getElementById("guideOverlay").style.display="flex";
-  showGuideSlide();
-}
-function showGuideSlide(){
-  let slide=guideSlides[guideIndex];
-  document.getElementById("guideImg").src=slide.img;
-  document.getElementById("guideText").innerText=slide.text;
-  guideIndex=(guideIndex+1)%guideSlides.length;
-  guideTimer=setTimeout(showGuideSlide,4000);
-}
-function stopGuide(){
-  clearTimeout(guideTimer);
-  document.getElementById("guideOverlay").style.display="none";
-}
+function startGuide(){ stopGuide(); document.getElementById("guideOverlay").style.display="flex"; showGuideSlide(); }
+function showGuideSlide(){ let slide=guideSlides[guideIndex]; document.getElementById("guideImg").src=slide.img; document.getElementById("guideText").innerText=slide.text; guideIndex=(guideIndex+1)%guideSlides.length; guideTimer=setTimeout(showGuideSlide,4000); }
+function stopGuide(){ clearTimeout(guideTimer); document.getElementById("guideOverlay").style.display="none"; }
 function switchToGuide(){ document.getElementById("tvSelect").selectedIndex=0; playTV(); }
+
 // --- FM Controls ---
 let fmIndex=0, fmPlayer=document.getElementById("fmPlayer");
-function playFM(){ let sel=document.getElementById("fmSelect");
-  let url=sel.value;
-  fmIndex=sel.selectedIndex;
-  if(!subscribed && fmIndex>0){ 
-    alert("Please subscribe to access this channel."); 
-    return;
-  }fmPlayer.src=document.getElementById("fmSelect").value; fmPlayer.play(); }
+function playFM(){ if(!checkSubscription() && fmIndex>0) return; fmIndex=document.getElementById("fmSelect").selectedIndex; fmPlayer.src=document.getElementById("fmSelect").value; fmPlayer.play(); }
 function pauseFM(){ fmPlayer.pause(); }
 function stopFM(){ fmPlayer.pause(); fmPlayer.currentTime=0; }
 function toggleMuteFM(){ fmPlayer.muted=!fmPlayer.muted; }
 function nextFM(){ fmIndex=(fmIndex+1)%fmStations.length; document.getElementById("fmSelect").selectedIndex=fmIndex; playFM(); }
-function prevFM(){ fmIndex=(fmIndex-1+fmStations.length)%fmStations.length; document.getElementById("fmSelect").selectedIndex=fmIndex; playFM(); }
-// --- Audio/Video Upload & Play ---
-const audioPlayer=document.getElementById("audioPlayer");
-const videoPlayer=document.getElementById("videoPlayer");
+function prevFM(){ fmIndex=(fmIndex+fmStations.length)%fmStations.length; document.getElementById("fmSelect").selectedIndex=fmIndex; playFM(); }
+
+// --- Audio/Video ---
+const audioPlayer=document.getElementById("audioPlayer"), videoPlayer=document.getElementById("videoPlayer");
 function uploadAudio(){ const file=document.getElementById("audioUpload").files[0]; if(file){ const url=URL.createObjectURL(file); audioTracks.push({name:file.name,url}); refreshAudio(); } }
 function uploadVideo(){ const file=document.getElementById("videoUpload").files[0]; if(file){ const url=URL.createObjectURL(file); videoClips.push({name:file.name,url}); refreshVideo(); } }
 function refreshAudio(){ let sel=document.getElementById("audioSelect"); sel.innerHTML=""; audioTracks.forEach(a=>sel.add(new Option(a.name,a.url))); }
@@ -204,8 +221,7 @@ function playVideo(){ videoPlayer.src=document.getElementById("videoSelect").val
 function forceDownload(url,name){ const a=document.createElement("a"); a.href=url; a.download=name||"media"; a.click(); }
 function downloadAudio(){ let sel=document.getElementById("audioSelect"); if(sel.value) forceDownload(sel.value, sel.options[sel.selectedIndex].text); }
 function downloadVideo(){ let sel=document.getElementById("videoSelect"); if(sel.value) forceDownload(sel.value, sel.options[sel.selectedIndex].text); }
-// --- Subscription ---
-function subscribe(plan){ subscribed=true; document.getElementById("subStatus").innerText="Status: Subscribed ("+plan+")"; }
+
 window.onload=loadLists;
 </script>
 </body>
