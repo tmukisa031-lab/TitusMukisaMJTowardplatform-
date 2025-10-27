@@ -522,25 +522,36 @@ function playVideo(){ videoPlayer.src=document.getElementById("videoSelect").val
 function forceDownload(url,name){ const a=document.createElement("a"); a.href=url; a.download=name||"media"; a.click(); }
 function downloadAudio(){ let sel=document.getElementById("audioSelect"); if(sel.value) forceDownload(sel.value, sel.options[sel.selectedIndex].text); }
 function downloadVideo(){ let sel=document.getElementById("videoSelect"); if(sel.value) forceDownload(sel.value, sel.options[sel.selectedIndex].text); }
-// ====== Subscription Manager ======
-const merchantID = "465914";
-const ratePerHour = 45.5; // UGX/hour for unlimited
+
+/* ===========================
+   UNIVERSAL MEDIA SUBSCRIPTION HANDLER
+   =========================== */
+
+// --- Config ---
+const merchantID = "465914";   // MTN MoMo Merchant Code
+const ratePerHour = 45.5;      // UGX/hour for unlimited
 const statusElement = document.getElementById("subStatus");
 
-window.onload = checkStoredSubscription;
+// --- Page Load: Check Subscription on Startup ---
+window.onload = function() {
+  checkStoredSubscription();
+  loadLists(); // if you have TV/FM lists, load them
+};
 
+// --- Subscription Plans ---
 function payPlan(plan, amount) {
   const code = `*165*3*1*${merchantID}*${amount}#`;
-  if (confirm(`Confirm payment of UGX ${amount} for ${plan.toUpperCase()} plan to Merchant ${merchantID} ()?`)) {
+  if (confirm(`Confirm payment of UGX ${amount} for ${plan.toUpperCase()} plan to Merchant ${merchantID}?`)) {
     window.location.href = 'tel:' + code;
-    activateSubscription(plan, amount);
+    activateSubscription(plan, amount); // Simulate activation after payment
+   
   }
 }
 
 function payUnlimited() {
   const amount = parseFloat(prompt("Enter amount to pay for Unlimited Plan (UGX 45.5/hour):"));
   if (isNaN(amount) || amount <= 0) {
-    alert("Invalid amount.");
+    alert("Invalid amount entered.");
     return;
   }
   const hours = amount / ratePerHour;
@@ -552,6 +563,7 @@ function payUnlimited() {
   }
 }
 
+// --- Activate Subscription ---
 function activateSubscription(plan, amount) {
   let expiry = new Date();
   if (plan === "1d") expiry.setHours(expiry.getHours() + 24);
@@ -562,17 +574,21 @@ function activateSubscription(plan, amount) {
     expiry.setHours(expiry.getHours() + hours);
   }
 
-  const data = { plan, expiry: expiry.toISOString() };
-  localStorage.setItem("subscriptionData", JSON.stringify(data));
+  const subscription = { plan, expiry: expiry.toISOString() };
+  localStorage.setItem("subscriptionData", JSON.stringify(subscription));
+
   updateStatus();
+  alert("✅ Subscription activated successfully!");
 }
 
+// --- Check Subscription from Storage ---
 function checkStoredSubscription() {
   const saved = localStorage.getItem("subscriptionData");
   if (!saved) {
     statusElement.innerText = "Status: Free Mode";
     return;
   }
+
   const data = JSON.parse(saved);
   const now = new Date();
   const expiry = new Date(data.expiry);
@@ -582,33 +598,68 @@ function checkStoredSubscription() {
     statusElement.innerText = "Status: Expired — Please Renew";
     alert("Your subscription has expired. Please renew to regain access.");
   } else {
-    const remaining = Math.floor((expiry - now) / 3600000);
-    statusElement.innerText = `Status: Active (${data.plan.toUpperCase()} plan) — Expires in ${remaining} hrs`;
+    const remainingHours = Math.floor((expiry - now) / 3600000);
+    statusElement.innerText = `Status: Active (${data.plan.toUpperCase()} plan) — Expires in ${remainingHours} hrs`;
   }
 }
 
+// --- Manual Refresh ---
 function updateStatus() {
   checkStoredSubscription();
 }
 
-// ====== Access Control Example ======
+// --- Access Control for Premium Features ---
 function checkAccess() {
   const saved = localStorage.getItem("subscriptionData");
   if (!saved) {
-    alert("Access denied. Please subscribe first.");
+    alert("🚫 Access denied. Please subscribe first.");
     return false;
   }
   const data = JSON.parse(saved);
   if (new Date() > new Date(data.expiry)) {
-    alert("Your subscription has expired. Please renew.");
+    alert("⏳ Your subscription has expired. Please renew to continue.");
     localStorage.removeItem("subscriptionData");
+    statusElement.innerText = "Status: Expired — Please Renew";
     return false;
   }
   return true;
 }
-// Example: You can wrap restricted features like this
-// if (!checkAccess()) return; // block access
-window.onload=loadLists;
+
+// --- Example Use Case: Protect a Function ---
+function playPremiumChannel(channelURL) {
+  if (!checkAccess()) return; // deny access if not subscribed
+  const player = document.getElementById("tvPlayer");
+  player.src = channelURL;
+  player.play();
+}
+
+// --- Optional Free Channel Loader ---
+function loadLists() {
+  const tvSelect = document.getElementById("tvSelect");
+  const fmSelect = document.getElementById("fmSelect");
+
+  if (!tvSelect || !fmSelect) return;
+
+  const freeTV = ["NTV", "UBC", "Bukedde 1"];
+  const premiumTV = ["CNN", "BBC", "National Geographic", "Disney", "MTV Base"];
+
+  tvSelect.innerHTML = "";
+  freeTV.forEach(ch => {
+    const opt = document.createElement("option");
+    opt.text = ch + " (Free)";
+    opt.value = ch.toLowerCase();
+    tvSelect.add(opt);
+  });
+
+  if (checkAccess()) {
+    premiumTV.forEach(ch => {
+      const opt = document.createElement("option");
+      opt.text = ch + " (Premium)";
+      opt.value = ch.toLowerCase();
+      tvSelect.add(opt);
+    });
+  }
+}
 </script>
 </body>
 </html>
