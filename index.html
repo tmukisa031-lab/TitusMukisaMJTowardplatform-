@@ -16,10 +16,15 @@ video, audio { width:100%; margin-top:10px; border-radius:8px; background:#000; 
 #guideOverlay img { max-width:90%; max-height:70%; margin-bottom:10px; border-radius:12px; box-shadow:0 0 20px rgba(0,0,0,0.8); }
 #guideOverlay button { margin-top:12px; padding:8px 16px; border:none; border-radius:8px; background:#0ff; color:#000; cursor:pointer; }
 .tv-frame { width:100%; max-width:1000px; max-height:600px; background:#111; border:15px solid #333; border-radius:15px; box-shadow:0 0 40px rgba(0,0,0,0.8); overflow:hidden; position:relative; margin:0 auto; }
+#timerDisplay { font-size: 18px; font-weight: bold; color: #ff6600; margin-bottom: 10px; }
 </style>
 </head>
 <body>
 <h1>🌍 Universal Media Hub</h1>
+
+<!-- Timer -->
+<div id="timerDisplay">⏳ Time Left: 0h 0m 0s</div>
+
 <!-- TV / IPTV Section -->
 <div class="section">
   <h2>📺 TV / IPTV</h2>
@@ -56,6 +61,7 @@ video, audio { width:100%; margin-top:10px; border-radius:8px; background:#000; 
     <button onclick="infoTV()">ℹ️ Info</button>
   </div>
 </div>
+
 <!-- FM Section -->
 <div class="section">
   <h2>📻 FM Radio</h2>
@@ -71,6 +77,7 @@ video, audio { width:100%; margin-top:10px; border-radius:8px; background:#000; 
     <button onclick="nextFM()">⏭ Next</button>
   </div>
 </div>
+
 <!-- Audio Section -->
 <div class="section">
   <h2>🎶 Audio / Music</h2>
@@ -80,6 +87,7 @@ video, audio { width:100%; margin-top:10px; border-radius:8px; background:#000; 
   <audio id="audioPlayer" controls></audio>
   <button onclick="downloadAudio()">⬇ Download Selected</button>
 </div>
+
 <!-- Video Section -->
 <div class="section">
   <h2>🎥 Video / Movies</h2>
@@ -89,55 +97,34 @@ video, audio { width:100%; margin-top:10px; border-radius:8px; background:#000; 
   <video id="videoPlayer" controls></video>
   <button onclick="downloadVideo()">⬇ Download Selected</button>
 </div>
+
 <!-- Subscription Section -->
 <div class="section">
   <h2>💳 Subscription Access</h2>
   <p>Select a plan to unlock premium IPTV & Radio channels:</p>
-
-  <!-- 1-Day Plan -->
-  <a href="tel:*165*3*1*465914*1000#" style="text-decoration:none;">
-    <button>📆 1 Day (UGX 1000)</button>
-  </a>
-
-  <!-- 1-Week Plan -->
-  <a href="tel:*165*3*1*465914*5000#" style="text-decoration:none;">
-    <button>🗓 1 Week (UGX 5000)</button>
-  </a>
-
-  <!-- 1-Month Plan -->
-  <a href="tel:*165*3*1*465914*15000#" style="text-decoration:none;">
-    <button>🗓 1 Month (UGX 15000)</button>
-  </a>
-
-  <!-- Unlimited Plan -->
+  <a href="javascript:void(0);" onclick="payPlan('1d',1000)"><button>📆 1 Day (UGX 1000)</button></a>
+  <a href="javascript:void(0);" onclick="payPlan('1w',5000)"><button>🗓 1 Week (UGX 5000)</button></a>
+  <a href="javascript:void(0);" onclick="payPlan('1m',15000)"><button>🗓 1 Month (UGX 15000)</button></a>
   <button onclick="payUnlimited()">♾ Unlimited (UGX 45.5/hour)</button>
-
   <p id="subStatus">Status: Free Mode</p>
 </div>
+
+<!-- User Stats -->
+<div id="userStats">
+  👥 Total Users: <span id="totalUsers">0</span> | 🟢 Active Users: <span id="activeUsers">0</span>
+</div>
+
 <script>
-// --- Media Lists ---
+// ====== Config ======
+const merchantID = "465914";
+const ratePerHour = 45.5;
+let subscribed=false, activationTime=null, expiryTime=null, timerInterval;
+
+// ====== Media Lists ======
 let tvChannels=[
-  {name:"Guide Channel:  subscriptions 6 digits-merchant code/id=(465914)",url:"guide"},  
+  {name:"Guide Channel", url:"guide"},  
   { name: "BBC News", url: "https://bbcmedia.ic.llnwd.net/stream/bbcmedia_bbcnews_mf_p" },
   { name: "CNN International", url: "https://cnn-cnninternational-1-eu.rakuten.wurl.tv/playlist.m3u8" },
-  { name: "DW News", url: "https://dwstream3-lh.akamaihd.net/i/dwstream3_live@124409/master.m3u8" },
-  { name: "Al Jazeera English", url: "https://live-hls-web-aje.getaj.net/AJE/01.m3u8" },
-  { name: "France 24 English", url: "https://static.france24.com/live/F24_EN_HI_HLS/live_web.m3u8" },
-  { name: "Sky News", url: "https://siloh.pluto.tv/lilo/production/SkyNews/master.m3u8" },
-  { name: "Bloomberg TV", url: "https://bloomberg-bloomberg-1-eu.rakuten.wurl.tv/playlist.m3u8" },
-  { name: "Red Bull TV", url: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_3360.m3u8" },
-  { name: "FIFA+", url: "https://bcovlive-a.akamaihd.net/ffe4b8b40db34d52b8c7a9d8c8f60a7f/eu-central-1/6057952919001/playlist.m3u8" },
-  { name: "MTV Live", url: "https://pluto-live.plutotv.net/egress/broker/us-east/mtv_live/playlist.m3u8" },
-  { name: "Trace Urban", url: "https://lightning-traceurban-samsungau.amagi.tv/playlist.m3u8" },
-  { name: "Trace Africa", url: "https://lightning-traceafrica-samsungau.amagi.tv/playlist.m3u8" },
-  { name: "Fashion TV", url: "https://fashiontv-fashiontv-1-eu.rakuten.wurl.tv/playlist.m3u8" },
-  { name: "NASA TV", url: "https://ntv1.akamaized.net/hls/live/2014075/NASA-Public/master.m3u8" },
-  { name: "National Geographic Wild", url: "https://dai.google.com/linear/hls/event/NATGEO_WILD/master.m3u8" },
-  { name: "PBS Kids", url: "https://2-fss-1.streamhoster.com/pl_140/amlst:200914-1298290/playlist.m3u8" },
-  { name: "Happy Kids TV", url: "https://happykidsjunior-vizio.amagi.tv/playlist.m3u8" },
-  { name: "Bukedde TV", url: "https://livestream.bukedde.co.ug/live/bukeddetv.m3u8" },
-  { name: "NTV Uganda", url: "https://ntv.akamaized.net/hls/live/2007531/ntvug/playlist.m3u8" },
-  { name: "UBC Uganda", url: "https://cdn.moderntv.eu/live/ubc/playlist.m3u8" },
   { name: "Guide Channel", url: "guide" },
   { name: "Local Free Channel", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
   { name: "Dailymotion Live", url: "https://stream-02.sg1.dailymotion.com/sec(_9ERdF8LSeW4DLU4w9GjmRJm)/dm/3/x2j4h6b/live.m3u8" },
@@ -178,142 +165,52 @@ let tvChannels=[
   { name: "TBN Africa", url: "https://tbn-tn-1-eu.rakuten.wurl.tv/playlist.m3u8" },
   { name: "Daystar", url: "https://daystar-1-us.samsung.wurl.tv/playlist.m3u8" },
   { name: "Emmanuel TV", url: "https://api.new.livestream.com/accounts/23664978/events/7337715/live.m3u8" },
-  { name: "Bloomberg Originals", url: "https://bloomberg-bloomberg-1-gb.samsung.wurl.tv/playlist.m3u8" },
-    { name: "Guide Channel", url: "guide"},
-    { name: "Local Free Channel", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
-    { name: "Dailymotion Live", url: "https://stream-02.sg1.dailymotion.com/sec(_9ERdF8LSeW4DLU4w9GjmRJm)/dm/3/x2j4h6b/live.m3u8"},
-    { name: "BBC News", url: "https://bbcmedia.ic.llnwd.net/stream/bbcmedia_bbcnews_mf_p"},
-    { name: "DW News", url: "https://dwstream3-lh.akamaihd.net/i/dwstream3_live@124409/master.m3u8"},
-    { name: "Al Jazeera English", url: "https://live-hls-web-aje.getaj.net/AJE/01.m3u8"},
-    { name: "France 24 English", url: "https://static.france24.com/live/F24_EN_HI_HLS/live_web.m3u8"},
-    { name: "Sky News", url: "https://siloh.pluto.tv/lilo/production/SkyNews/master.m3u8"},
-    { name: "CNN Fast", url: "https://cnn-cnninternational-1-eu.rakuten.wurl.tv/playlist.m3u8"},
-    { name: "Bloomberg Television", url: "https://bloomberg-bloomberg-1-eu.rakuten.wurl.tv/playlist.m3u8"},
-      { name: "Red Bull TV", url: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_3360.m3u8"},
-    { name: "Trace Sports Stars", url: "https://lightning-tracesport-intl-samsungnz.amagi.tv/playlist.m3u8"},
-    { name: "FIFA+ Channel", url: "https://bcovlive-a.akamaihd.net/ffe4b8b40db34d52b8c7a9d8c8f60a7f/eu-central-1/6057952919001/playlist.m3u8"},
-    { name: "X Sports", url: "https://dai2.xumo.com/amagi_hls_data_xumo1212A-x-sports/CDN/playlist.m3u8"},
-    { name: "Fuel TV", url: "https://fueltv-fueltv-1-eu.rakuten.wurl.tv/playlist.m3u8"},
-    { name: "MovieSphere", url: "https://moviesphere-samsungus.amagi.tv/playlist.m3u8"},
-    { name: "FilmRise Movies", url: "https://dai.google.com/linear/hls/event/fKf2zcnOTY2M0UdtbfxHqQ/master.m3u8"},
-    { name: "Plex Action Zone", url: "https://stream.ads.ottera.tv/playlist.m3u8?network_id=789"},
-    { name: "Classic Cinema", url: "https://classiccinema-amd-global.fast.anvato.net/amc/cnn/clsc/master.m3u8"},
-      { name: "Bukedde TV", url: "https://livestream.bukedde.co.ug/live/bukeddetv.m3u8" },
-    { name: "NTV Uganda", url: "https://ntv.akamaized.net/hls/live/2007531/ntvug/playlist.m3u8"},
-    { name: "UBC Uganda", url: "https://cdn.moderntv.eu/live/ubc/playlist.m3u8"},
-    { name: "BBS Terefayina", url: "https://edge01.bbstv.co.ug/live/bbstv.m3u8"},
-    { name: "TV West", url: "https://edge02.visiongroup.co.ug/live/tvwest.m3u8"},
-    { name: "Trace Urban", url: "https://lightning-traceurban-samsungau.amagi.tv/playlist.m3u8"},
-    { name: "Trace Africa", url: "https://lightning-traceafrica-samsungau.amagi.tv/playlist.m3u8"},
-    { name: "FashionTV", url: "https://fashiontv-fashiontv-1-eu.rakuten.wurl.tv/playlist.m3u8" },
-    { name: "MTV Live", url: "https://pluto-live.plutotv.net/egress/broker/us-east/mtv_live/playlist.m3u8"},
-      { name: "Vevo Pop", url: "https://dai2.xumo.com/amagi_hls_data_xumo1212A-vevo-pop/CDN/playlist.m3u8"},
-    { name: "MTV Classic", url: "https://pluto-live.plutotv.net/egress/broker/us-east/mtv_classic/playlist.m3u8"},
-    { name: "Trace Gospel", url: "https://lightning-tracegospel-samsungnz.amagi.tv/playlist.m3u8"},
-    { name: "Toon Goggles", url: "https://toongoggles-toongoggles-1-eu.rakuten.wurl.tv/playlist.m3u8"},
-    { name: "PBS Kids", url: "https://2-fss-1.streamhoster.com/pl_140/amlst:200914-1298290/playlist.m3u8"},
-    { name: "Happy Kids TV", url: "https://happykidsjunior-vizio.amagi.tv/playlist.m3u8"},
-      { name: "NASA TV", url: "https://ntv1.akamaized.net/hls/live/2014075/NASA-Public/master.m3u8"},
-    { name: "National Geographic Wild", url: "https://dai.google.com/linear/hls/event/NATGEO_WILD/master.m3u8"},
-    { name: "CGTN Documentary", url: "https://news.cgtn.com/resource/live/document/cgtn-doc.m3u8"},
-    { name: "TBN Africa", url: "https://tbn-tn-1-eu.rakuten.wurl.tv/playlist.m3u8"},
-    { name: "Daystar", url: "https://daystar-1-us.samsung.wurl.tv/playlist.m3u8" },
-    { name: "Emmanuel TV", url: "https://api.new.livestream.com/accounts/23664978/events/7337715/live.m3u8"},
-      { name: "Guide Channel", url: "guide"},
-    { name: "Local Free Channel", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"},
-    { name: "Dailymotion Live", url: "https://stream-02.sg1.dailymotion.com/sec(_9ERdF8LSeW4DLU4w9GjmRJm)/dm/3/x2j4h6b/live.m3u8"},
-      { name: "BBC News", url: "https://bbcmedia.ic.llnwd.net/stream/bbcmedia_bbcnews_mf_p"},
-    { name: "DW News", url: "https://dwstream3-lh.akamaihd.net/i/dwstream3_live@124409/master.m3u8"},
-    { name: "Al Jazeera English", url: "https://live-hls-web-aje.getaj.net/AJE/01.m3u8"},
-    { name: "France 24 English", url: "https://static.france24.com/live/F24_EN_HI_HLS/live_web.m3u8"},
-    { name: "Sky News", url: "https://siloh.pluto.tv/lilo/production/SkyNews/master.m3u8"},
-    { name: "CNN Fast", url: "https://cnn-cnninternational-1-eu.rakuten.wurl.tv/playlist.m3u8"},
-    { name: "Bloomberg Television", url: "https://bloomberg-bloomberg-1-eu.rakuten.wurl.tv/playlist.m3u8"},
-      { name: "Red Bull TV", url: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_3360.m3u8"},
-    { name: "Trace Sports Stars", url: "https://lightning-tracesport-intl-samsungnz.amagi.tv/playlist.m3u8"},
-    { name: "FIFA+ Channel", url: "https://bcovlive-a.akamaihd.net/ffe4b8b40db34d52b8c7a9d8c8f60a7f/eu-central-1/6057952919001/playlist.m3u8"},
-    { name: "X Sports", url: "https://dai2.xumo.com/amagi_hls_data_xumo1212A-x-sports/CDN/playlist.m3u8"},
-    { name: "Fuel TV", url: "https://fueltv-fueltv-1-eu.rakuten.wurl.tv/playlist.m3u8"},
-      { name: "MovieSphere", url: "https://moviesphere-samsungus.amagi.tv/playlist.m3u8"},
-    { name: "FilmRise Movies", url: "https://dai.google.com/linear/hls/event/fKf2zcnOTY2M0UdtbfxHqQ/master.m3u8"},
-    { name: "Plex Action Zone", url: "https://stream.ads.ottera.tv/playlist.m3u8?network_id=789"},
-    { name: "Classic Cinema", url: "https://classiccinema-amd-global.fast.anvato.net/amc/cnn/clsc/master.m3u8"},
-      { name: "Bukedde TV", url: "https://livestream.bukedde.co.ug/live/bukeddetv.m3u8"},
-    { name: "NTV Uganda", url: "https://ntv.akamaized.net/hls/live/2007531/ntvug/playlist.m3u8"},
-    { name: "UBC Uganda", url: "https://cdn.moderntv.eu/live/ubc/playlist.m3u8"},
-    { name: "BBS Terefayina", url: "https://edge01.bbstv.co.ug/live/bbstv.m3u8"},
-    { name: "TV West", url: "https://edge02.visiongroup.co.ug/live/tvwest.m3u8"},
-      { name: "Trace Urban", url: "https://lightning-traceurban-samsungau.amagi.tv/playlist.m3u8"},
-    { name: "Trace Africa", url: "https://lightning-traceafrica-samsungau.amagi.tv/playlist.m3u8"},
-    { name: "FashionTV", url: "https://fashiontv-fashiontv-1-eu.rakuten.wurl.tv/playlist.m3u8"},
-    { name: "MTV Live", url: "https://pluto-live.plutotv.net/egress/broker/us-east/mtv_live/playlist.m3u8"},
-    { name: "Vevo Pop", url: "https://dai2.xumo.com/amagi_hls_data_xumo1212A-vevo-pop/CDN/playlist.m3u8"},
-    { name: "MTV Classic", url: "https://pluto-live.plutotv.net/egress/broker/us-east/mtv_classic/playlist.m3u8"},
-    { name: "Trace Gospel", url: "https://lightning-tracegospel-samsungnz.amagi.tv/playlist.m3u8" },
-      { name: "Toon Goggles", url: "https://toongoggles-toongoggles-1-eu.rakuten.wurl.tv/playlist.m3u8"},
-    { name: "PBS Kids", url: "https://2-fss-1.streamhoster.com/pl_140/amlst:200914-1298290/playlist.m3u8"},
-    { name: "Happy Kids TV", url: "https://happykidsjunior-vizio.amagi.tv/playlist.m3u8"},
-      { name: "NASA TV", url: "https://ntv1.akamaized.net/hls/live/2014075/NASA-Public/master.m3u8"},
-    { name: "National Geographic Wild", url: "https://dai.google.com/linear/hls/event/NATGEO_WILD/master.m3u8"},
-    { name: "CGTN Documentary", url: "https://news.cgtn.com/resource/live/document/cgtn-doc.m3u8"},
-      { name: "TBN Africa", url: "https://tbn-tn-1-eu.rakuten.wurl.tv/playlist.m3u8"},
-    { name: "Daystar", url: "https://daystar-1-us.samsung.wurl.tv/playlist.m3u8"},
-    { name: "Emmanuel TV", url: "https://api.new.livestream.com/accounts/23664978/events/7337715/live.m3u8"},
-      { name: "Guide Channel", url: "guide"},
-    { name: "Local Free Channel", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"},
-    { name: "Dailymotion Live", url: "https://stream-02.sg1.dailymotion.com/sec(_9ERdF8LSeW4DLU4w9GjmRJm)/dm/3/x2j4h6b/live.m3u8"},
-    { name: "Red Bull TV", url: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_3360.m3u8"},
-      { name: "BBC News", url: "https://bbcmedia.ic.llnwd.net/stream/bbcmedia_bbcnews_mf_p"},
-    { name: "DW News", url: "https://dwstream3-lh.akamaihd.net/i/dwstream3_live@124409/master.m3u8"},
-    { name: "Al Jazeera English", url: "https://live-hls-web-aje.getaj.net/AJE/01.m3u8"},
-    { name: "France 24 English", url: "https://static.france24.com/live/F24_EN_HI_HLS/live_web.m3u8"},
-    { name: "Sky News", url: "https://siloh.pluto.tv/lilo/production/SkyNews/master.m3u8"},
-    { name: "CNN Fast", url: "https://cnn-cnninternational-1-eu.rakuten.wurl.tv/playlist.m3u8"},
-      { name: "Red Bull TV", url: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_3360.m3u8"},
-    { name: "Trace Sports Stars", url: "https://lightning-tracesport-intl-samsungnz.amagi.tv/playlist.m3u8"},
-    { name: "FIFA+ Channel", url: "https://bcovlive-a.akamaihd.net/ffe4b8b40db34d52b8c7a9d8c8f60a7f/eu-central-1/6057952919001/playlist.m3u8"},
-     { name: "MovieSphere", url: "https://moviesphere-samsungus.amagi.tv/playlist.m3u8"},
-    { name: "FilmRise Movies", url: "https://dai.google.com/linear/hls/event/fKf2zcnOTY2M0UdtbfxHqQ/master.m3u8"},
-    { name: "Plex Action Zone", url: "https://stream.ads.ottera.tv/playlist.m3u8?network_id=789"},
-      { name: "Bukedde TV", url: "https://livestream.bukedde.co.ug/live/bukeddetv.m3u8"},
-    { name: "NTV Uganda", url: "https://ntv.akamaized.net/hls/live/2007531/ntvug/playlist.m3u8"},
-    { name: "UBC Uganda", url: "https://cdn.moderntv.eu/live/ubc/playlist.m3u8"},
-    { name: "Trace Urban", url: "https://lightning-traceurban-samsungau.amagi.tv/playlist.m3u8"},
-    { name: "FashionTV", url: "https://fashiontv-fashiontv-1-eu.rakuten.wurl.tv/playlist.m3u8" },
-    { name: "Bloomberg Originals", url: "https://bloomberg-bloomberg-1-gb.samsung.wurl.tv/playlist.m3u8"}
+  { name: "Bloomberg Originals", url: "https://bloomberg-bloomberg-1-gb.samsung.wurl.tv/playlist.m3u8" },{ name: "BBC News", url: "https://bbcmedia.ic.llnwd.net/stream/bbcmedia_bbcnews_mf_p" },
+
+{ name: "CNN International", url: "https://cnn-cnninternational-1-eu.rakuten.wurl.tv/playlist.m3u8" },
+
+{ name: "DW News", url: "https://dwstream3-lh.akamaihd.net/i/dwstream3_live@124409/master.m3u8" },
+
+{ name: "Al Jazeera English", url: "https://live-hls-web-aje.getaj.net/AJE/01.m3u8" },
+
+{ name: "France 24 English", url: "https://static.france24.com/live/F24_EN_HI_HLS/live_web.m3u8" },
+
+{ name: "Sky News", url: "https://siloh.pluto.tv/lilo/production/SkyNews/master.m3u8" },
+
+{ name: "Bloomberg TV", url: "https://bloomberg-bloomberg-1-eu.rakuten.wurl.tv/playlist.m3u8" },
+
+{ name: "Red Bull TV", url: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_3360.m3u8" },
+
+{ name: "FIFA+", url: "https://bcovlive-a.akamaihd.net/ffe4b8b40db34d52b8c7a9d8c8f60a7f/eu-central-1/6057952919001/playlist.m3u8" },
+
+{ name: "MTV Live", url: "https://pluto-live.plutotv.net/egress/broker/us-east/mtv_live/playlist.m3u8" },
+
+{ name: "Trace Urban", url: "https://lightning-traceurban-samsungau.amagi.tv/playlist.m3u8" },
+
+{ name: "Trace Africa", url: "https://lightning-traceafrica-samsungau.amagi.tv/playlist.m3u8" },
+
+{ name: "Fashion TV", url: "https://fashiontv-fashiontv-1-eu.rakuten.wurl.tv/playlist.m3u8" },
+
+{ name: "NASA TV", url: "https://ntv1.akamaized.net/hls/live/2014075/NASA-Public/master.m3u8" },
+
+{ name: "National Geographic Wild", url: "https://dai.google.com/linear/hls/event/NATGEO_WILD/master.m3u8" },
+
+{ name: "PBS Kids", url: "https://2-fss-1.streamhoster.com/pl_140/amlst:200914-1298290/playlist.m3u8" },
+
+{ name: "Happy Kids TV", url: "https://happykidsjunior-vizio.amagi.tv/playlist.m3u8" },
+
+{ name: "Bukedde TV", url: "https://livestream.bukedde.co.ug/live/bukeddetv.m3u8" },
+
+{ name: "NTV Uganda", url: "https://ntv.akamaized.net/hls/live/2007531/ntvug/playlist.m3u8" },
+
+{ name: "UBC Uganda", url: "https://cdn.moderntv.eu/live/ubc/playlist.m3u8" }
 
 
 ];
-let fmStations=[  { name: "NPR News: subscriptions 6 digits-merchant code/id=(465914)", url: "https://npr-ice.streamguys1.com/live.mp3" },
-  { name: "BBC Radio 1", url: "https://stream.live.vc.bbcmedia.co.uk/bbc_radio_one" },
-  { name: "BBC Radio 2", url: "https://stream.live.vc.bbcmedia.co.uk/bbc_radio_two" },
-  { name: "BBC Radio 3", url: "https://stream.live.vc.bbcmedia.co.uk/bbc_radio_three" },
-  { name: "BBC Radio 4", url: "https://stream.live.vc.bbcmedia.co.uk/bbc_radio_fourfm" },
-  { name: "BBC World Service", url: "https://stream.live.vc.bbcmedia.co.uk/bbc_world_service" },
+
+let fmStations=[
   { name: "NPR News", url: "https://npr-ice.streamguys1.com/live.mp3" },
-  { name: "Classic FM UK", url: "http://media-ice.musicradio.com/ClassicFMMP3" },
-  { name: "Radio France FIP", url: "https://direct.fipradio.fr/live/fip-midfi.mp3" },
-  { name: "NRJ France", url: "http://cdn.nrjaudio.fm/audio1/fr/30001/mp3_128.mp3" },
-  { name: "Deutschlandfunk", url: "https://st01.sslstream.dlf.de/dlf/01/128/mp3" },
-  { name: "Smooth Jazz Florida", url: "https://us2.internet-radio.com/proxy/smoothjazzflorida?mp=/stream" },
-  { name: "KEXP 90.3 Seattle", url: "https://kexp-mp3-128.streamguys1.com/kexp128.mp3" },
-  { name: "WBGO Jazz 88.3 Newark", url: "https://wbgo.streamguys1.com/wbgo128.mp3" },
-  { name: "Capital FM Uganda", url: "https://stream.zeno.fm/ssn0z7z0qd0uv" },
-  { name: "CBS FM Buganda", url: "https://stream.zeno.fm/qnydx59r0ueuv" },
-  { name: "Galaxy FM Uganda", url: "https://stream.zeno.fm/k5c1a4y9r0uev" },
-  { name: "91.3 KFM Uganda", url: "https://stream.zeno.fm/ys7dr9x8r0uev" },
-  { name: "Radio One Uganda", url: "https://radioonefm.ug/stream" },
-  { name: "Power FM Uganda", url: "https://stream.zeno.fm/x9w3k2j2r0uev" },
-  { name: "Beat FM Uganda", url: "https://stream.zeno.fm/beatfmuganda" },
-  { name: "Baba FM Uganda", url: "https://stream.zeno.fm/babafm" },
-  { name: "Splash FM Uganda", url: "https://stream.zeno.fm/splashfm" },
-  { name: "Radio West Uganda", url: "https://stream.zeno.fm/radiowest" },
-  { name: "NHK World Japan", url: "http://nhk-world.streamguys1.com/nhk_world_japan.mp3" },
-  { name: "Radio Disney USA", url: "http://streaming.radioservice.com:8000/radiodisney" },
-  { name: "Chicago Public Radio", url: "https://chicagopublicradio.streamguys1.com/wbez128.mp3" },
-  { name: "Jazz24 Seattle", url: "https://live.wostreaming.net/direct/ppm-jazz24mp3-ibc1" },
-  { name: "iHeartRadio Pop Hits", url: "https://playerservices.streamtheworld.com/api/livestream-redirect/IHR_POP_HITS.mp3" },
-  { name: "Radio Paradise", url: "https://stream.radioparadise.com/mp3-192" },
+  { name: "BBC Radio 1", url: "https://stream.live.vc.bbcmedia.co.uk/bbc_radio_one" },
   { name: "NPR News", url: "https://npr-ice.streamguys1.com/live.mp3" },
   { name: "BBC Radio 1", url: "https://stream.live.vc.bbcmedia.co.uk/bbc_radio_one" },
   { name: "BBC Radio 2", url: "https://stream.live.vc.bbcmedia.co.uk/bbc_radio_two" },
@@ -321,6 +218,9 @@ let fmStations=[  { name: "NPR News: subscriptions 6 digits-merchant code/id=(46
   { name: "BBC Radio 4", url: "https://stream.live.vc.bbcmedia.co.uk/bbc_radio_fourfm" },
   { name: "BBC World Service", url: "https://stream.live.vc.bbcmedia.co.uk/bbc_world_service" },
   { name: "Classic FM UK", url: "http://media-ice.musicradio.com/ClassicFMMP3" },
+  {name:"Kiss FM", url:"http://kissfm-uk.radio.co/sd/live.mp3"},
+  {name:"Radio One", url:"http://radio1-uk.radio.co/sd/live.mp3"},
+  {name:"Classic FM", url:"http://media-ice.musicradio.com/ClassicFMMP3"},
   { name: "Radio France FIP", url: "https://direct.fipradio.fr/live/fip-midfi.mp3" },
   { name: "Radio Nova 100FM Ireland", url: "https://ncr-live-icecast.scdn.arkena.com/nova100fm-mp3" },
   { name: "NRJ France", url: "http://cdn.nrjaudio.fm/audio1/fr/30001/mp3_128.mp3" },
@@ -362,88 +262,73 @@ let fmStations=[  { name: "NPR News: subscriptions 6 digits-merchant code/id=(46
   { name: "SomaFM Groove Salad", url: "https://somafm.com/groovesalad.pls" },
   { name: "SomaFM Drone Zone", url: "https://somafm.com/dronezone.pls" },
   { name: "SomaFM Lush", url: "https://somafm.com/lush.pls" },
-  { name: "Radio Caprice Classical", url: "http://radcap.ru:8000/classical"  },
+  { name: "Radio Caprice Classical", url: "http://radcap.ru:8000/classical" },
   { name: "Radio Caprice Jazz", url: "http://radcap.ru:8000/jazz" },
   { name: "Radio Caprice Rock", url: "http://radcap.ru:8000/rock" },
-  { name: "Radio Caprice Pop", url: "http://radcap.ru:8000/pop" },{ name:"NPR News", url:"https://npr-ice.streamguys1.com/live.mp3"},
-  { name:"BBC Radio 1", url:"https://stream.live.vc.bbcmedia.co.uk/bbc_radio_one"},
-  { name:"BBC Radio 2", url:"https://stream.live.vc.bbcmedia.co.uk/bbc_radio_two"},
-  { name:"BBC World Service", url:"https://stream.live.vc.bbcmedia.co.uk/bbc_world_service"},
-  { name:"Radio France FIP", url:"https://direct.fipradio.fr/live/fip-midfi.mp3"},
-  { name:"Classic FM UK", url:"http://media-ice.musicradio.com/ClassicFMMP3"},
-  { name:"NPR News", url:"https://npr-ice.streamguys1.com/live.mp3"},
-  { name:"Smooth Jazz Florida", url:"https://us2.internet-radio.com/proxy/smoothjazzflorida?mp=/stream"},
-  { name:"KEXP 90.3 Seattle", url:"https://kexp-mp3-128.streamguys1.com/kexp128.mp3"},
-  { name:"WBGO Jazz 88.3 Newark", url:"https://wbgo.streamguys1.com/wbgo128.mp3"},  
-  { name:"Capital FM Uganda", url:"https://stream.zeno.fm/ssn0z7z0qd0uv" },
-  { name:"CBS FM Buganda", url:"https://stream.zeno.fm/qnydx59r0ueuv" },
-  { name:"Galaxy FM Uganda", url:"https://stream.zeno.fm/k5c1a4y9r0uev" },
-  { name:"91.3 KFM Uganda", url:"https://stream.zeno.fm/ys7dr9x8r0uev" },
-  { name:"Radio One Uganda", url:"https://radioonefm.ug/stream"},
-  { name:"Power FM Uganda", url:"https://stream.zeno.fm/x9w3k2j2r0uev" },
-  { name:"Radio Garden Global Mix", url:"https://listen.radiogarden.com/live"},
-  { name:"ABC Radio Australia", url:"http://abc.net.au/res/stream/live/mp3" },
-  { name:"Radio Nova 100FM Ireland", url:"https://ncr-live-icecast.scdn.arkena.com/nova100fm-mp3" },
-  { name:"CNR China Radio International", url:"http://crlive.cri.cn/cri4.m3u" },
-  { name:"Radio Italia", url:"http://icecast.radioitalia.it/RadioItaliaSoloMusica.mp3" },  
-  { name:"BBC Radio 1", url:"https://stream.live.vc.bbcmedia.co.uk/bbc_radio_one" },
-  { name:"BBC Radio 2", url:"https://stream.live.vc.bbcmedia.co.uk/bbc_radio_two"},
-  { name:"BBC Radio 3", url:"https://stream.live.vc.bbcmedia.co.uk/bbc_radio_three"},
-  { name:"BBC Radio 4", url:"https://stream.live.vc.bbcmedia.co.uk/bbc_radio_fourfm"},
-  { name:"BBC World Service", url:"https://stream.live.vc.bbcmedia.co.uk/bbc_world_service"},
-  { name:"Classic FM UK", url:"http://media-ice.musicradio.com/ClassicFMMP3"},
-  { name:"Radio France FIP", url:"https://direct.fipradio.fr/live/fip-midfi.mp3"},
-  { name:"Radio Nova 100FM Ireland", url:"https://ncr-live-icecast.scdn.arkena.com/nova100fm-mp3" },
-  { name:"NRJ France", url:"http://cdn.nrjaudio.fm/audio1/fr/30001/mp3_128.mp3" },
-  { name:"Deutschlandfunk", url:"https://st01.sslstream.dlf.de/dlf/01/128/mp3" },
-  { name:"NPR News", url:"https://npr-ice.streamguys1.com/live.mp3" },
-  { name:"Smooth Jazz Florida", url:"https://us2.internet-radio.com/proxy/smoothjazzflorida?mp=/stream" },
-  { name:"KEXP 90.3 Seattle", url:"https://kexp-mp3-128.streamguys1.com/kexp128.mp3"},
-  { name:"WBGO Jazz 88.3 Newark", url:"https://wbgo.streamguys1.com/wbgo128.mp3" },
-  { name:"Radio Disney USA", url:"http://streaming.radioservice.com:8000/radiodisney" },
-  { name:"Chicago Public Radio", url:"https://chicagopublicradio.streamguys1.com/wbez128.mp3" },
-  { name:"Capital FM USA", url:"https://capitalfm-usa.streamguys1.com/capitalfm128.mp3"},
-  { name:"Jazz24 Seattle", url:"https://live.wostreaming.net/direct/ppm-jazz24mp3-ibc1"},
-  { name:"iHeartRadio Pop Hits", url:"https://playerservices.streamtheworld.com/api/livestream-redirect/IHR_POP_HITS.mp3"},
-  { name:"Radio Paradise", url:"https://stream.radioparadise.com/mp3-192" },
-  { name:"Capital FM Uganda", url:"https://stream.zeno.fm/ssn0z7z0qd0uv" },
-  { name:"CBS FM Buganda", url:"https://stream.zeno.fm/qnydx59r0ueuv" },
-  { name:"Galaxy FM Uganda", url:"https://stream.zeno.fm/k5c1a4y9r0uev" },
-  { name:"91.3 KFM Uganda", url:"https://stream.zeno.fm/ys7dr9x8r0uev" },
-  { name:"Radio One Uganda", url:"https://radioonefm.ug/stream" },
-  { name:"Power FM Uganda", url:"https://stream.zeno.fm/x9w3k2j2r0uev" },
-  { name:"Beat FM Uganda", url:"https://stream.zeno.fm/beatfmuganda" },
-  { name:"Baba FM Uganda", url:"https://stream.zeno.fm/babafm"},
-  { name:"Splash FM Uganda", url:"https://stream.zeno.fm/splashfm" },
-  { name:"Radio West Uganda", url:"https://stream.zeno.fm/radiowest"},
-  { name:"ABC Radio Australia", url:"http://abc.net.au/res/stream/live/mp3" },
-  { name:"NHK World Japan", url:"http://nhk-world.streamguys1.com/nhk_world_japan.mp3"},
-  { name:"Radio India", url:"http://www.radioindiaonline.com:8000/live" },
-  { name:"Dubai Eye 103.8", url:"http://icecast1.playoutsolution.com:8000/dubaieye"},
-  { name:"Radio Pakistan", url:"http://radio.gov.pk:8000/live" },
-  { name:"Radio China International", url:"http://crlive.cri.cn/cri4.m3u"}, 
-  { name:"Radio Cultura Brazil", url:"http://200.136.27.12:8000/live" },
-  { name:"Radio Nacional Chile", url:"http://radio.uchile.cl:8000/live" },
-  { name:"Radio Caracol Colombia", url:"http://radios.caracoltv.com:8000/live" },
-  { name:"Radio Mitre Argentina", url:"http://s4.mitreweb.com.ar:8000/live" },
-  { name:"Radio Rebelde Cuba", url:"http://streaming.rebelde.cu:8000/live" },
-    { name:"Radio Garden Global Mix", url:"https://listen.radiogarden.com/live" },
-  { name:"TuneIn Global", url:"https://tunein.com/radio/Internet-Radio-c197066/"},
-  { name:"Radio Italia Solo Musica", url:"http://icecast.radioitalia.it/RadioItaliaSoloMusica.mp3" },
-  { name:"Radio 24 Italy", url:"http://stream.radio24.it/live.mp3" },
-  { name:"SomaFM Groove Salad", url:"https://somafm.com/groovesalad.pls"},
-  { name:"SomaFM Drone Zone", url:"https://somafm.com/dronezone.pls" },
-  { name:"SomaFM Lush", url:"https://somafm.com/lush.pls" },
-  { name:"Radio Caprice Classical", url:"http://radcap.ru:8000/classical" },
-  { name:"Radio Caprice Jazz", url:"http://radcap.ru:8000/jazz" },
-  { name:"Radio Caprice Rock", url:"http://radcap.ru:8000/rock" },
-  { name:"Radio Caprice Pop", url:"http://radcap.ru:8000/pop" }
+  { name: "Radio Caprice Pop", url: "http://radcap.ru:8000/pop" },{ name: "BBC Radio 1", url: "https://stream.live.vc.bbcmedia.co.uk/bbc_radio_one" },
 
+{ name: "BBC Radio 2", url: "https://stream.live.vc.bbcmedia.co.uk/bbc_radio_two" },
+
+{ name: "BBC Radio 3", url: "https://stream.live.vc.bbcmedia.co.uk/bbc_radio_three" },
+
+{ name: "BBC Radio 4", url: "https://stream.live.vc.bbcmedia.co.uk/bbc_radio_fourfm" },
+
+{ name: "BBC World Service", url: "https://stream.live.vc.bbcmedia.co.uk/bbc_world_service" },
+
+{ name: "NPR News", url: "https://npr-ice.streamguys1.com/live.mp3" },
+
+{ name: "Classic FM UK", url: "http://media-ice.musicradio.com/ClassicFMMP3" },
+
+{ name: "Radio France FIP", url: "https://direct.fipradio.fr/live/fip-midfi.mp3" },
+
+{ name: "NRJ France", url: "http://cdn.nrjaudio.fm/audio1/fr/30001/mp3_128.mp3" },
+
+{ name: "Deutschlandfunk", url: "https://st01.sslstream.dlf.de/dlf/01/128/mp3" },
+
+{ name: "Smooth Jazz Florida", url: "https://us2.internet-radio.com/proxy/smoothjazzflorida?mp=/stream" },
+
+{ name: "KEXP 90.3 Seattle", url: "https://kexp-mp3-128.streamguys1.com/kexp128.mp3" },
+
+{ name: "WBGO Jazz 88.3 Newark", url: "https://wbgo.streamguys1.com/wbgo128.mp3" },
+
+{ name: "Capital FM Uganda", url: "https://stream.zeno.fm/ssn0z7z0qd0uv" },
+
+{ name: "CBS FM Buganda", url: "https://stream.zeno.fm/qnydx59r0ueuv" },
+
+{ name: "Galaxy FM Uganda", url: "https://stream.zeno.fm/k5c1a4y9r0uev" },
+
+{ name: "91.3 KFM Uganda", url: "https://stream.zeno.fm/ys7dr9x8r0uev" },
+
+{ name: "Radio One Uganda", url: "https://radioonefm.ug/stream" },
+
+{ name: "Power FM Uganda", url: "https://stream.zeno.fm/x9w3k2j2r0uev" },
+
+{ name: "Beat FM Uganda", url: "https://stream.zeno.fm/beatfmuganda" },
+
+{ name: "Baba FM Uganda", url: "https://stream.zeno.fm/babafm" },
+
+{ name: "Splash FM Uganda", url: "https://stream.zeno.fm/splashfm" },
+
+{ name: "Radio West Uganda", url: "https://stream.zeno.fm/radiowest" },
+
+{ name: "NHK World Japan", url: "http://nhk-world.streamguys1.com/nhk_world_japan.mp3" },
+
+{ name: "Radio Disney USA", url: "http://streaming.radioservice.com:8000/radiodisney" },
+
+{ name: "Chicago Public Radio", url: "https://chicagopublicradio.streamguys1.com/wbez128.mp3" },
+
+{ name: "Jazz24 Seattle", url: "https://live.wostreaming.net/direct/ppm-jazz24mp3-ibc1" },
+
+{ name: "iHeartRadio Pop Hits", url: "https://playerservices.streamtheworld.com/api/livestream-redirect/IHR_POP_HITS.mp3" },
+
+{ name: "Radio Paradise", url: "https://stream.radioparadise.com/mp3-192" }
 
 
 ];
+
 let audioTracks=[], videoClips=[];
-// --- Load Lists ---
+
+// ====== Load Media Lists ======
 function loadLists(){
   const tvSel=document.getElementById("tvSelect"); tvSel.innerHTML="";
   tvChannels.forEach(c=>tvSel.add(new Option(c.name,c.url)));
@@ -451,23 +336,28 @@ function loadLists(){
   fmStations.forEach(s=>fmSel.add(new Option(s.name,s.url)));
   refreshAudio(); refreshVideo();
 }
-// --- Search ---
-function searchTV(){ let q=document.getElementById("tvSearch").value.toLowerCase(); let sel=document.getElementById("tvSelect"); sel.innerHTML=""; tvChannels.filter(c=>c.name.toLowerCase().includes(q)).forEach(c=>sel.add(new Option(c.name,c.url))); }
-function searchFM(){ let q=document.getElementById("fmSearch").value.toLowerCase(); let sel=document.getElementById("fmSelect"); sel.innerHTML=""; fmStations.filter(s=>s.name.toLowerCase().includes(q)).forEach(s=>sel.add(new Option(s.name,s.url))); }
-function searchAudio(){ let q=document.getElementById("audioSearch").value.toLowerCase(); let sel=document.getElementById("audioSelect"); sel.innerHTML=""; audioTracks.filter(a=>a.name.toLowerCase().includes(q)).forEach(a=>sel.add(new Option(a.name,a.url))); }
-function searchVideo(){ let q=document.getElementById("videoSearch").value.toLowerCase(); let sel=document.getElementById("videoSelect"); sel.innerHTML=""; videoClips.filter(v=>v.name.toLowerCase().includes(q)).forEach(v=>sel.add(new Option(v.name,v.url))); }
-// --- TV Controls ---
-let tvIndex=0, tvPlayer=document.getElementById("tvPlayer");
-let numBuffer="", subscribed=false;
-function playTV(){
-  let sel=document.getElementById("tvSelect");
-  let url=sel.value;
+
+// ====== Search ======
+function searchTV(){ filterSelect("tvSearch","tvSelect",tvChannels); }
+function searchFM(){ filterSelect("fmSearch","fmSelect",fmStations); }
+function searchAudio(){ filterSelect("audioSearch","audioSelect",audioTracks); }
+function searchVideo(){ filterSelect("videoSearch","videoSelect",videoClips); }
+
+function filterSelect(searchId,selectId,list){
+  const q=document.getElementById(searchId).value.toLowerCase();
+  const sel=document.getElementById(selectId); sel.innerHTML="";
+  list.filter(x=>x.name.toLowerCase().includes(q)).forEach(x=>sel.add(new Option(x.name,x.url)));
+}
+
+// ====== TV Controls ======
+let tvIndex=0, tvPlayer=document.getElementById("tvPlayer"), numBuffer="";
+function playTV() {
+  if(!checkAccess()) return;
+  const sel=document.getElementById("tvSelect");
   tvIndex=sel.selectedIndex;
-  if(!subscribed && tvIndex>0){ 
-    alert("Please subscribe to access this channel."); 
-    return;
-  }
-  if(url==="guide"){ startGuide(); } else { stopGuide(); tvPlayer.src=url; tvPlayer.play(); }
+  const url=sel.value;
+  if(url==="guide"){ startGuide(); return; } else { stopGuide(); }
+  tvPlayer.src=url; tvPlayer.play();
 }
 function pauseTV(){ tvPlayer.pause(); }
 function stopTV(){ tvPlayer.pause(); tvPlayer.currentTime=0; }
@@ -477,12 +367,13 @@ function prevTV(){ tvIndex=(tvIndex-1+tvChannels.length)%tvChannels.length; docu
 function pressNumber(n){ numBuffer+=n; }
 function goToChannel(){ let idx=parseInt(numBuffer)-1; if(idx>=0 && idx<tvChannels.length){ tvIndex=idx; document.getElementById("tvSelect").selectedIndex=idx; playTV(); } numBuffer=""; }
 function infoTV(){ alert("Channel Info: "+tvChannels[tvIndex].name); }
-// --- Guide Channel with Images ---
+
+// ====== Guide Channel ======
 let guideSlides=[
   {img:"https://picsum.photos/800/400?random=1", text:"Welcome to the Guide Channel!"},
   {img:"https://picsum.photos/800/400?random=2", text:"Use the Remote to control your media easily."},
   {img:"https://picsum.photos/800/400?random=3", text:"Upload and download your own audio & video."},
-  {img:"https://picsum.photos/800/400?random=4", text:"Subscribe for premium channels.enter 6 digits merchant id/code:'465914', to proceed with access "},
+  {img:"https://picsum.photos/800/400?random=4", text:"Subscribe for premium channels. Enter 6 digits merchant id/code: 465914."},
   {img:"https://picsum.photos/800/400?random=5", text:"Enjoy movies, music, TV & FM in one hub."}
 ];
 let guideIndex=0, guideTimer;
@@ -492,175 +383,135 @@ function startGuide(){
   showGuideSlide();
 }
 function showGuideSlide(){
-  let slide=guideSlides[guideIndex];
+  const slide=guideSlides[guideIndex];
   document.getElementById("guideImg").src=slide.img;
   document.getElementById("guideText").innerText=slide.text;
   guideIndex=(guideIndex+1)%guideSlides.length;
   guideTimer=setTimeout(showGuideSlide,4000);
 }
-function stopGuide(){
-  clearTimeout(guideTimer);
-  document.getElementById("guideOverlay").style.display="none";
-}
+function stopGuide(){ clearTimeout(guideTimer); document.getElementById("guideOverlay").style.display="none"; }
 function switchToGuide(){ document.getElementById("tvSelect").selectedIndex=0; playTV(); }
-// --- FM Controls ---
+
+// ====== FM Controls ======
 let fmIndex=0, fmPlayer=document.getElementById("fmPlayer");
-function playFM(){ let sel=document.getElementById("fmSelect");
-  let url=sel.value;
+function playFM() {
+  if(!checkAccess()) return;
+  const sel=document.getElementById("fmSelect");
   fmIndex=sel.selectedIndex;
-  if(!subscribed && fmIndex>0){ 
-    alert("Please subscribe to access this channel."); 
-    return;
-  }fmPlayer.src=document.getElementById("fmSelect").value; fmPlayer.play(); }
+  fmPlayer.src=sel.value;
+  fmPlayer.play();
+}
 function pauseFM(){ fmPlayer.pause(); }
 function stopFM(){ fmPlayer.pause(); fmPlayer.currentTime=0; }
 function toggleMuteFM(){ fmPlayer.muted=!fmPlayer.muted; }
 function nextFM(){ fmIndex=(fmIndex+1)%fmStations.length; document.getElementById("fmSelect").selectedIndex=fmIndex; playFM(); }
 function prevFM(){ fmIndex=(fmIndex-1+fmStations.length)%fmStations.length; document.getElementById("fmSelect").selectedIndex=fmIndex; playFM(); }
-// --- Audio/Video Upload & Play ---
+
+// ====== Audio/Video Upload & Play ======
 const audioPlayer=document.getElementById("audioPlayer");
 const videoPlayer=document.getElementById("videoPlayer");
 function uploadAudio(){ const file=document.getElementById("audioUpload").files[0]; if(file){ const url=URL.createObjectURL(file); audioTracks.push({name:file.name,url}); refreshAudio(); } }
 function uploadVideo(){ const file=document.getElementById("videoUpload").files[0]; if(file){ const url=URL.createObjectURL(file); videoClips.push({name:file.name,url}); refreshVideo(); } }
 function refreshAudio(){ let sel=document.getElementById("audioSelect"); sel.innerHTML=""; audioTracks.forEach(a=>sel.add(new Option(a.name,a.url))); }
 function refreshVideo(){ let sel=document.getElementById("videoSelect"); sel.innerHTML=""; videoClips.forEach(v=>sel.add(new Option(v.name,v.url))); }
-function playAudio(){ audioPlayer.src=document.getElementById("audioSelect").value; audioPlayer.play(); }
-function playVideo(){ videoPlayer.src=document.getElementById("videoSelect").value; videoPlayer.play(); }
+function playAudio(){ if(!checkAccess()) return; audioPlayer.src=document.getElementById("audioSelect").value; audioPlayer.play(); }
+function playVideo(){ if(!checkAccess()) return; videoPlayer.src=document.getElementById("videoSelect").value; videoPlayer.play(); }
 function forceDownload(url,name){ const a=document.createElement("a"); a.href=url; a.download=name||"media"; a.click(); }
 function downloadAudio(){ let sel=document.getElementById("audioSelect"); if(sel.value) forceDownload(sel.value, sel.options[sel.selectedIndex].text); }
 function downloadVideo(){ let sel=document.getElementById("videoSelect"); if(sel.value) forceDownload(sel.value, sel.options[sel.selectedIndex].text); }
-// --- Subscription ---
-function subscribe(plan){ subscribed=true; document.getElementById("subStatus").innerText="Status: Subscribed ("+plan+")"; }
-// --- Config ---
-const merchantID = "465914";   // MTN MoMo Merchant Code
-const rate = 45.5;      // UGX/hour for unlimited
-const statusElement = document.getElementById("subStatus");
 
-// --- Page Load: Check Subscription on Startup ---
-window.onload = function() {
-  checkStoredSubscription();
-  loadLists(); // if you have TV/FM lists, load them
-};
-
-// --- Subscription Plans ---
-function payPlan(plan, amount) {
-  const code = `*165*3*1*${merchantID}*${amount}#`;
-  if (confirm(`Confirm payment of UGX ${amount} for ${plan.toUpperCase()} plan to Merchant ${merchantID}?`)) {
-    window.location.href = 'tel:' + code;
-    activateSubscription(plan, amount); // Simulate activation after payment
-   
+// ====== Subscription ======
+function payPlan(plan, amount){
+  const code=`*165*3*1*${merchantID}*${amount}#`;
+  if(confirm(`Confirm payment of UGX ${amount} for ${plan.toUpperCase()} plan?`)){
+    window.location.href='tel:'+code;
+    activateSubscription(plan, amount);
   }
 }
 
-function payUnlimited() {
-  const amount = parseFloat(prompt("Enter amount to pay for Unlimited Plan (UGX 45.5/hour):"));
-  if (isNaN(amount) || amount <= 0) {
-    alert("Invalid amount entered.");
-    return;
-  }
-  const hours = amount / ratePerHour;
-  alert(`You are paying UGX ${amount.toFixed(0)} for approximately ${hours.toFixed(1)} hours of access.`);
-  const code = `*165*3*1*${merchantID}*${amount.toFixed(0)}#`;
-  if (confirm(`Proceed to pay UGX ${amount.toFixed(0)} to Merchant ${merchantID}?`)) {
-    window.location.href = 'tel:' + code;
-    activateSubscription("unlimited", amount);
-  }
+function payUnlimited(){
+  const amount=parseFloat(prompt("Enter amount to pay for Unlimited Plan (UGX 45.5 per hour):"));
+  if(isNaN(amount)||amount<=0){ alert("Invalid amount"); return; }
+  const hours=amount/ratePerHour;
+  alert(`You are paying UGX ${amount.toFixed(0)} for ~${hours.toFixed(1)} hours of access.`);
+  const momoLink=`tel:*165*3*1*${merchantID}*${amount.toFixed(0)}#`;
+  const a=document.createElement("a"); a.href=momoLink; a.style.display="none"; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  activateSubscription("unlimited",amount);
 }
 
-// --- Activate Subscription ---
-function activateSubscription(plan, amount) {
-  let expiry = new Date();
-  if (plan === "1d") expiry.setHours(expiry.getHours() + 24);
-  else if (plan === "1w") expiry.setDate(expiry.getDate() + 7);
-  else if (plan === "1m") expiry.setMonth(expiry.getMonth() + 1);
-  else if (plan === "unlimited") {
-    const hours = amount / rate;
-    expiry.setHours(expiry.getHours() + hours);
-  }
-
-  const subscription = { plan, expiry: expiry.toISOString() };
-  localStorage.setItem("subscriptionData", JSON.stringify(subscription));
-
+function activateSubscription(plan, amount){
+  const now=new Date();
+  expiryTime=new Date();
+  if(plan==="1d") expiryTime.setHours(now.getHours()+24);
+  else if(plan==="1w") expiryTime.setDate(now.getDate()+7);
+  else if(plan==="1m") expiryTime.setMonth(now.getMonth()+1);
+  else if(plan==="unlimited") expiryTime.setHours(now.getHours()+(amount/ratePerHour));
+  activationTime=now;
+  subscribed=true;
+  localStorage.setItem("subscriptionData",JSON.stringify({plan,expiry:expiryTime.toISOString()}));
   updateStatus();
-  alert("✅ Subscription activated successfully!");
+  startTimer();
+  updateUserCounts(true);
+  alert("✅ Subscription activated!");
 }
 
-// --- Check Subscription from Storage ---
-function checkStoredSubscription() {
-  const saved = localStorage.getItem("subscriptionData");
-  if (!saved) {
-    statusElement.innerText = "Status: Free Mode";
-    return;
-  }
-
-  const data = JSON.parse(saved);
-  const now = new Date();
-  const expiry = new Date(data.expiry);
-
-  if (now > expiry) {
-    localStorage.removeItem("subscriptionData");
-    statusElement.innerText = "Status: Expired — Please Renew";
-    alert("Your subscription has expired. Please renew to regain access.");
-  } else {
-    const remainingHours = Math.floor((expiry - now) / 3600000);
-    statusElement.innerText = `Status: Active (${data.plan.toUpperCase()} plan) — Expires in ${remainingHours} hrs`;
-  }
+function checkStoredSubscription(){
+  const saved=localStorage.getItem("subscriptionData");
+  if(!saved){ statusElement.innerText="Status: Free Mode"; return; }
+  const data=JSON.parse(saved);
+  if(new Date()>new Date(data.expiry)){ localStorage.removeItem("subscriptionData"); statusElement.innerText="Status: Expired — Please Renew"; subscribed=false; } 
+  else { subscribed=true; expiryTime=new Date(data.expiry); updateStatus(); startTimer(); }
 }
 
-// --- Manual Refresh ---
-function updateStatus() {
-  checkStoredSubscription();
-}
-
-// --- Access Control for Premium Features ---
-function checkAccess() {
-  const saved = localStorage.getItem("subscriptionData");
-  if (!saved) {
-    alert("🚫 Access denied. Please subscribe first.");
-    return false;
-  }
-  const data = JSON.parse(saved);
-  if (new Date() > new Date(data.expiry)) {
-    alert("⏳ Your subscription has expired. Please renew to continue.");
-    localStorage.removeItem("subscriptionData");
-    statusElement.innerText = "Status: Expired — Please Renew";
-    return false;
-  }
+function checkAccess(){
+  if(!subscribed || !expiryTime || new Date()>expiryTime){ alert("🚫 Access denied. Please subscribe first."); return false; }
   return true;
 }
 
-// --- Example Use Case: Protect a Function ---
-function playPremiumChannel(channelURL) {
-  if (!checkAccess()) return; // deny access if not subscribed
-  const player = document.getElementById("tvPlayer");
-  player.src = channelURL;
-  player.play();
-}
-function payUnlimited() {
-  const rate = 45.5; // UGX per hour
-  const amount = parseFloat(prompt("Enter amount you wish to pay for Unlimited Plan (UGX 45.5 per hour):"));
-  if (isNaN(amount) || amount <= 0) {
-    alert("Invalid amount.");
-    return;
-  }
-
-  // Calculate access time
-  const hours = amount / rate;
-  alert(`You’re paying UGX ${amount.toFixed(0)}, which equals about ${hours.toFixed(1)} hours of unlimited access.`);
-
-  // Build the MoMo dial string
-  const momoLink = `tel:*165*3*1*465914*${amount.toFixed(0)}#`;
-
-  // Open the dial prompt on mobile
-  const a = document.createElement("a");
-  a.href = momoLink;
-  a.style.display = "none";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+// ====== Timer ======
+function startTimer(){
+  clearInterval(timerInterval);
+  timerInterval=setInterval(()=>{
+    if(!expiryTime) return;
+    let remaining=expiryTime-Date.now();
+    if(remaining<=0){
+      clearInterval(timerInterval);
+      subscribed=false;
+      localStorage.removeItem("subscriptionData");
+      statusElement.innerText="Status: Expired";
+      document.getElementById("timerDisplay").innerText="⏳ Subscription Expired";
+      alert("Your subscription has expired. Please renew.");
+      tvPlayer.pause(); fmPlayer.pause();
+      updateUserCounts(false);
+      return;
+    }
+    let hrs=Math.floor(remaining/3600000);
+    let mins=Math.floor((remaining%3600000)/60000);
+    let secs=Math.floor((remaining%60000)/1000);
+    document.getElementById("timerDisplay").innerText=`
+    
+    ⏳ Time Left: ${hrs}h ${mins}m ${secs}s`;
+  },1000);
 }
 
+// ====== Status & Users ======
+const statusElement=document.getElementById("subStatus");
+function updateStatus(){ statusElement.innerText=`Status: Subscribed (${subscribed ? "Active" : "Expired"})`; }
 
+// Simulated user counts (for demo purposes)
+let totalUsers=123, activeUsers=subscribed?1:0;
+function updateUserCounts(active){
+  if(active){ activeUsers++; totalUsers++; }
+  else{ activeUsers=Math.max(activeUsers-1,0); }
+  document.getElementById("totalUsers").innerText=totalUsers;
+  document.getElementById("activeUsers").innerText=activeUsers;
+}
+
+// ====== Initialization ======
+window.onload=function(){
+  loadLists();
+  checkStoredSubscription();
+}
 </script>
 </body>
 </html>
