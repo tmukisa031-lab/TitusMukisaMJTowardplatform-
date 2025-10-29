@@ -488,29 +488,35 @@ function startTimer(){
     let hrs=Math.floor(remaining/3600000);
     let mins=Math.floor((remaining%3600000)/60000);
     let secs=Math.floor((remaining%60000)/1000);
-    document.getElementById("timerDisplay").innerText=`
-    
-    ⏳ Time Left: ${hrs}h ${mins}m ${secs}s`;
+    document.getElementById("timerDisplay").innerText=`   ⏳ Time Left: ${hrs}h ${mins}m ${secs}s`;
   },1000);
 }
 
 // ====== Status & Users ======
 const statusElement=document.getElementById("subStatus");
 function updateStatus(){ statusElement.innerText=`Status: Subscribed (${subscribed ? "Active" : "Expired"})`; }
+function loadUserStats() {
+  const total = parseInt(localStorage.getItem("totalUsers")) || 0;
+  const active = parseInt(localStorage.getItem("activeUsers")) || 0;
+  document.getElementById("totalUsers").innerText = total;
+  document.getElementById("activeUsers").innerText = active;
+}
 
-// Simulated user counts (for demo purposes)
-let totalUsers=123, activeUsers=subscribed?1:0;
-function updateUserCounts(active){
-  if(active){ activeUsers++; totalUsers++; }
-  else{ activeUsers=Math.max(activeUsers-1,0); }
-  document.getElementById("totalUsers").innerText=totalUsers;
-  document.getElementById("activeUsers").innerText=activeUsers;
+function updateUserCounts(onSubscribe) {
+  let total = parseInt(localStorage.getItem("totalUsers")) || 0;
+  let active = parseInt(localStorage.getItem("activeUsers")) || 0;
+  if (onSubscribe) { total++; active++; } else { active = Math.max(active - 1, 0); }
+  localStorage.setItem("totalUsers", total);
+  localStorage.setItem("activeUsers", active);
+  loadUserStats();
 }
 
 // ====== Initialization ======
 window.onload=function(){
   loadLists();
   checkStoredSubscription();
+  loadUserStats();
+  startTimer();
 }
 </script>
 </body>
