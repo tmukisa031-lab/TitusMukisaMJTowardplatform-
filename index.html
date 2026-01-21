@@ -17,6 +17,23 @@ video, audio { width:100%; margin-top:10px; border-radius:8px; background:#000; 
 #guideOverlay button { margin-top:12px; padding:8px 16px; border:none; border-radius:8px; background:#0ff; color:#000; cursor:pointer; }
 .tv-frame { width:100%; max-width:1000px; max-height:900px; background:#111; border:15px solid #333; border-radius:15px; box-shadow:0 0 40px rgba(0,0,0,0.8); overflow:hidden; position:relative; margin:0 auto; }
 #timerDisplay { font-size: 18px; font-weight: bold; color: #ff6600; margin-bottom: 10px; }
+#eq label {
+  display: inline-block;
+  width: 100%;
+  font-size: 12px;
+}
+
+#eq input {
+  width: 100%;
+}
+
+#visualizer {
+  width: 100%;
+  background: #000;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
 </style>
 </head>
 <body>
@@ -78,13 +95,39 @@ video, audio { width:100%; margin-top:10px; border-radius:8px; background:#000; 
   </div>
 </div>
 
+
 <!-- Audio Section -->
 <div class="section">
   <h2>🎶 Audio / Music</h2>
+
   <input type="text" id="audioSearch" placeholder="Search audio..." onkeyup="searchAudio()">
   <input type="file" id="audioUpload" accept="audio/*" onchange="uploadAudio()">
+
   <select id="audioSelect" size="6" onchange="playAudio()"></select>
+
   <audio id="audioPlayer" controls></audio>
+
+  <!-- Equalizer -->
+  <h3>🎚 Equalizer</h3>
+  <div id="eq">
+    <label>Bass <input type="range" min="-30" max="30" value="0" data-band="0"></label>
+    <label>Low <input type="range" min="-30" max="30" value="0" data-band="1"></label>
+    <label>Mid <input type="range" min="-30" max="30" value="0" data-band="2"></label>
+    <label>High <input type="range" min="-30" max="30" value="0" data-band="3"></label>
+    <label>Treble <input type="range" min="-30" max="30" value="0" data-band="4"></label>
+  </div>
+
+  <!-- Visualizer -->
+  <canvas id="visualizer" height="100"></canvas>
+
+  <!-- Drum Pads -->
+  <h3>🥁 Drum Pads</h3>
+  <div class="remote">
+    <button onclick="triggerDrum('kick')">Kick</button>
+    <button onclick="triggerDrum('snare')">Snare</button>
+    <button onclick="triggerDrum('hihat')">Hi-Hat</button>
+  </div>
+
   <button onclick="downloadAudio()">⬇ Download Selected</button>
 </div>
 
@@ -123,6 +166,13 @@ let subscribed=false, activationTime=null, expiryTime=null, timerInterval;
 // ====== Media Lists ======
 let tvChannels=[
       { name: "Guide Channel: subscriptions 6 digits-merchant code/id=(465914)", url: "guide" },
+      { name: "Newsmax TV (HD)", url: "https://nmx1ota.akamaized.net/hls/live/2107010/Live_1/index.m3u8" },  // US news stream 0
+  { name: "Red Bull TV (Web Embed)", url: "https://www.livehdtv.com/embed/red-bull-tv/" },           // embeddable stream (not direct HLS) 1
+  { name: "CNN International", url: "https://cnn-cnninternational-1-eu.rakuten.wurl.tv/playlist.m3u8" },
+  { name: "DW News", url: "https://dwstream3-lh.akamaihd.net/i/dwstream3_live@124409/master.m3u8" },
+  { name: "Al Jazeera English", url: "https://live-hls-web-aje.getaj.net/AJE/01.m3u8" },
+  { name: "France 24 English", url: "https://static.france24.com/live/F24_EN_HI_HLS/live_web.m3u8" },
+  { name: "Sky News UK", url: "https://siloh.pluto.tv/lilo/production/SkyNews/master.m3u8" },
       { name: "Red Bull TV", url: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_3360.m3u8" },
 { name: "Trace Urban", url: "https://lightning-traceurban-samsungau.amagi.tv/playlist.m3u8" },
 { name: "Newsmax TV", url: "https://nmxlive.akamaized.net/hls/live/529965/Live_1/index.m3u8" },
@@ -800,6 +850,75 @@ function prevFM(){ fmIndex=(fmIndex-1+fmStations.length)%fmStations.length; docu
 // ====== Audio/Video Upload & Play ======
 const audioPlayer=document.getElementById("audioPlayer");
 const videoPlayer=document.getElementById("videoPlayer");
+
+/* ===== AUDIO ENGINE ===== */
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+const audioCtx = new AudioCtx();
+
+const audioEl = document.getElementById("audioPlayer");
+const source = audioCtx.createMediaElementSource(audioEl);
+
+/* ===== EQUALIZER ===== */
+const frequencies = [60, 170, 350, 1000, 3500];
+const filters = frequencies.map(freq => {
+  const f = audioCtx.createBiquadFilter();
+  f.type = "peaking";
+  f.frequency.value = freq;
+  f.Q.value = 1;
+  f.gain.value = 0;
+  return f;
+});
+
+/* Chain filters */
+source.connect(filters[0]);
+filters.reduce((a,b)=>{ a.connect(b); return b; });
+filters[filters.length-1].connect(audioCtx.destination);
+
+/* EQ sliders */
+document.querySelectorAll("#eq input").forEach(slider=>{
+  slider.oninput = e=>{
+    filters[e.target.dataset.band].gain.value = e.target.value;
+  };
+});
+
+/* ===== VISUALIZER ===== */
+const analyser = audioCtx.createAnalyser();
+filters[filters.length-1].connect(analyser);
+analyser.fftSize = 256;
+
+const canvas = document.getElementById("visualizer");
+const ctx = canvas.getContext("2d");
+
+function drawViz(){
+  requestAnimationFrame(drawViz);
+  const data = new Uint8Array(analyser.frequencyBinCount);
+  analyser.getByteFrequencyData(data);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const barW = canvas.width / data.length;
+  data.forEach((v,i)=>{
+    ctx.fillStyle = "#0ff";
+    ctx.fillRect(i*barW, canvas.height, barW-1, -v/2);
+  });
+}
+drawViz();
+
+/* ===== DRUMS ===== */
+const drumFiles = {
+  kick: "kick.mp3",
+  snare: "snare.mp3",
+  hihat: "hihat.mp3"
+};
+
+function triggerDrum(type){
+  const d = new Audio(drumFiles[type]);
+  d.volume = 0.9;
+  d.play();
+}
+
+/* Resume audio context on play */
+audioEl.onplay = ()=> audioCtx.resume();
+
+
 function uploadAudio(){ const file=document.getElementById("audioUpload").files[0]; if(file){ const url=URL.createObjectURL(file); audioTracks.push({name:file.name,url}); refreshAudio(); } }
 function uploadVideo(){ const file=document.getElementById("videoUpload").files[0]; if(file){ const url=URL.createObjectURL(file); videoClips.push({name:file.name,url}); refreshVideo(); } }
 function refreshAudio(){ let sel=document.getElementById("audioSelect"); sel.innerHTML=""; audioTracks.forEach(a=>sel.add(new Option(a.name,a.url))); }
@@ -908,6 +1027,10 @@ window.onload=function(){
   loadUserStats();
   startTimer();
 }
+
+
+
+
 </script>
 </body>
 </html>
